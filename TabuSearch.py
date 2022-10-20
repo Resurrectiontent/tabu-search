@@ -34,3 +34,19 @@ class TabuSearch(ABC, Generic[TL]):
         # TODO: consider calculating quality for aspiration
         # TODO: account tabu-list and aspiration criteria
         ...
+
+    def choose(self, neighbours) -> tuple:
+        # TODO: sort by quality, probabilistically (statistically) make a choice
+        ...
+
+    def make_tick(self):
+        # TODO: pop tabu-list
+        ...
+
+    def memorize_move(self, move):
+        # TODO: push tabu-list, mid-term memory
+        ...
+
+    def converged(self):
+        # TODO: update argument
+        return self.convergence_criterion.converged()
