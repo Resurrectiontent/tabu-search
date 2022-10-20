@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class Convergence(ABC):
+class ConvergenceCriterion(ABC):
     @abstractmethod
-    def converged(self, *args):
+    def converged(self, *args, **kwargs) -> bool:
         ...
