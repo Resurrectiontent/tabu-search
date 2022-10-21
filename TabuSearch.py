@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Generic, TypeVar, Dict, Iterable, Callable
+from typing import Generic, TypeVar, Dict, Iterable, Callable, Tuple, List
 
 import numpy as np
 from numpy import ndarray
@@ -29,7 +29,7 @@ class TabuSearch(ABC, Generic[TL]):
 
         return x
 
-    def get_neighbours(self, x):
+    def get_neighbours(self, x) -> Dict[str, List[Tuple[ndarray, ndarray]]]:
         possible_moves = {move: func(x) for move, func in self.possible_moves.items()}
         # TODO: consider calculating quality for aspiration
         # TODO: account tabu-list and aspiration criteria
