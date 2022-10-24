@@ -1,10 +1,10 @@
 from abc import ABC
 from typing import Generic, TypeVar, Dict, Iterable, Callable, Tuple, List
 
-import numpy as np
 from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
+from memory.base import MemoryCriterion
 
 # TODO: Consider designing separate class for tabu list
 TL = TypeVar('TL')  # Tabu list
@@ -13,6 +13,8 @@ TL = TypeVar('TL')  # Tabu list
 class TabuSearch(ABC, Generic[TL]):
     convergence_criterion: ConvergenceCriterion
     possible_moves: Dict[str, Callable[[ndarray], Iterable[ndarray]]]
+    quality: Callable[[ndarray], float]
+    aspiration_criterion: MemoryCriterion
     _tabu_list: TL
 
     def optimize(self, x0: ndarray):
@@ -32,7 +34,7 @@ class TabuSearch(ABC, Generic[TL]):
     def get_neighbours(self, x) -> Dict[str, List[Tuple[ndarray, ndarray]]]:
         possible_moves = {move: func(x) for move, func in self.possible_moves.items()}
         # TODO: consider calculating quality for aspiration
-        # TODO: account tabu-list and aspiration criteria
+        # TODO: account tabu-list and aspiration memory
         ...
 
     def choose(self, neighbours) -> tuple:
