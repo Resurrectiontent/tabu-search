@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
 from copy import copy
 from operator import itemgetter
-from typing import List, Set, Hashable, Iterable, Callable, TypeVar
+from typing import List, Set, Iterable, Callable
 
-from moves.base import Move
+from movement.base import Move, TMoveId
 from utility.set import unite, intersect
-
-TMoveId = TypeVar('TMoveId', bound=Hashable)
 
 
 class MemoryCriterion(ABC):
     _moves: List[Move]
     _move_idx: Set[TMoveId]
+    # TODO: Consider more elegant implementation
     _move_id_getter: Callable[[Move], TMoveId]
 
     @abstractmethod
