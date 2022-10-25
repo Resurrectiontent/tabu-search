@@ -5,6 +5,7 @@ from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
 from memory.base import MemoryCriterion
+from moves.base import Move
 
 # TODO: Consider designing separate class for tabu list
 TL = TypeVar('TL')  # Tabu list
@@ -14,8 +15,8 @@ class TabuSearch(ABC, Generic[TL]):
     convergence_criterion: ConvergenceCriterion
     possible_moves: Dict[str, Callable[[ndarray], Iterable[ndarray]]]
     quality: Callable[[ndarray], float]
-    aspiration_criterion: MemoryCriterion
-    _tabu_list: TL
+    _aspiration: MemoryCriterion
+    _tabu: MemoryCriterion
 
     def optimize(self, x0: ndarray):
         x = x0
@@ -45,9 +46,10 @@ class TabuSearch(ABC, Generic[TL]):
         # TODO: pop tabu-list
         ...
 
-    def memorize_move(self, move):
+    def memorize_move(self, move: Move):
         # TODO: push tabu-list, mid-term memory
-        ...
+        self._tabu.memorize(move)
+        self._aspiration.memorize(move)
 
     def converged(self):
         # TODO: update argument
