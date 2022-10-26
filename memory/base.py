@@ -4,7 +4,6 @@ from operator import itemgetter
 from typing import List, Set, Iterable, Callable
 
 from movement.base import Move, TMoveId
-from utility.set import unite, intersect
 
 
 class MemoryCriterion(ABC):
@@ -44,10 +43,10 @@ class MemoryCriterion(ABC):
         self._criterion = negated_criterion(self._criterion)
 
     def __and__(self, other: 'MemoryCriterion') -> 'MemoryCriterion':
-        return CumulativeMemoryCriterion(unite, self, other)
+        return CumulativeMemoryCriterion(set.union, self, other)
 
     def __or__(self, other: 'MemoryCriterion') -> 'MemoryCriterion':
-        return CumulativeMemoryCriterion(intersect, self, other)
+        return CumulativeMemoryCriterion(set.intersection, self, other)
 
     def __invert__(self) -> 'MemoryCriterion':
         result = copy(self)

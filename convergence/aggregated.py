@@ -14,16 +14,16 @@ class AggregatedConvergence(ConvergenceCriterion, ABC):
 class ConjunctiveConvergence(AggregatedConvergence):
     def __init__(self, *args):
         """
-        Initializes conjunctive Convergence. Converges, when all criteria from *args converge.
+        Initializes conjunctive Convergence. Converges, when all memory from *args converge.
         :param args: Convergences to account.
         """
         super().__init__(*args)
 
     def converged(self, **kwargs):
         """
-        Checks, whether all the criteria converged.
-        :param kwargs: arguments for criteria convergence.
-        :return: True, if all criteria converged, otherwise, False.
+        Checks, whether all the memory converged.
+        :param kwargs: arguments for memory convergence.
+        :return: True, if all memory converged, otherwise, False.
         """
         return all(self._convergence_results(**kwargs))
 
@@ -31,7 +31,7 @@ class ConjunctiveConvergence(AggregatedConvergence):
 class DisjunctiveConvergence(AggregatedConvergence):
     def __init__(self, *args):
         """
-        Initializes disjunctive convergence. Converges, when any criteria from *args converged.
+        Initializes disjunctive convergence. Converges, when any memory from *args converged.
         :param args: Convergences to account.
         """
         super().__init__(*args)
@@ -39,7 +39,7 @@ class DisjunctiveConvergence(AggregatedConvergence):
     def converged(self, **kwargs) -> bool:
         """
         Checks, whether any criterion converged.
-        :param kwargs: arguments for criteria convergence.
+        :param kwargs: arguments for memory convergence.
         :return: True, if at least one criterion converged, otherwise, False.
         """
         return any(self._convergence_results(**kwargs))
