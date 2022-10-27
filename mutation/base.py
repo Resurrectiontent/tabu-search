@@ -8,16 +8,24 @@ TMoveId = TypeVar('TMoveId', bound=Hashable)
 
 
 @dataclass
-class Move:
+class Solution:
+    name: str
     position: ndarray
     quality: float
-    name: str
 
 
 class MutationBehaviour(ABC):
     def __init__(self, quality: Callable[[ndarray], float]):
         self.quality = quality
 
+    def mutation_name(self, *args) -> str:
+        return self.mutation_type + f'({", ".join(args)})'
+
+    @property
     @abstractmethod
-    def mutate(self, pivot: Move) -> List[Move]:
+    def mutation_type(self) -> str:
+        ...
+
+    @abstractmethod
+    def mutate(self, pivot: Solution) -> List[Solution]:
         ...

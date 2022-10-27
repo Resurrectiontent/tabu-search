@@ -5,7 +5,9 @@ from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
 from memory.base import MemoryCriterion
-from mutation.base import Move
+from mutation.base import Solution
+
+# TODO: Consider introducing separate class for quality instead of float
 
 # TODO: Consider designing separate class for tabu list
 TL = TypeVar('TL')  # Tabu list
@@ -46,7 +48,7 @@ class TabuSearch(ABC, Generic[TL]):
         # TODO: pop tabu-list
         ...
 
-    def memorize_move(self, move: Move):
+    def memorize_move(self, move: Solution):
         # TODO: push tabu-list, mid-term memory
         self._tabu.memorize(move)
         self._aspiration.memorize(move)
