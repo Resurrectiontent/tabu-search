@@ -5,7 +5,7 @@ from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
 from memory.base import MemoryCriterion
-from movement.base import Move
+from mutation.base import Move
 
 # TODO: Consider designing separate class for tabu list
 TL = TypeVar('TL')  # Tabu list

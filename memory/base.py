@@ -3,7 +3,7 @@ from copy import copy
 from operator import itemgetter
 from typing import List, Set, Iterable, Callable
 
-from movement.base import Move, TMoveId
+from mutation.base import Move, TMoveId
 
 
 class MemoryCriterion(ABC):

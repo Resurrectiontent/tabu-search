@@ -14,7 +14,7 @@ class Move:
     name: str
 
 
-class MovementBehaviour(ABC):
+class MutationBehaviour(ABC):
     def __init__(self, quality: Callable[[ndarray], float]):
         self.quality = quality
 
