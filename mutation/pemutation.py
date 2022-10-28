@@ -5,6 +5,8 @@ from numpy import ndarray
 from mutation.base import MutationBehaviour, Solution
 
 
+# TODO: make CustomMutation
+#  move to mutation/base.py
 class CustomPermutation(MutationBehaviour):
     _mutation_type = None
     _generate_mutations = None
