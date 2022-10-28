@@ -1,35 +1,13 @@
-from abc import ABC, abstractmethod
-from typing import Iterable, List, Callable, Dict, Tuple, Optional
+from typing import Iterable, Callable, Tuple, Optional
 
 from numpy import ndarray
 
 from mutation.base import MutationBehaviour, Solution
 
 
-# TODO: Do we need this?
-class PermutationMutation(MutationBehaviour, ABC):
-    def __init__(self, quality: Callable[[ndarray], float]):
-        super().__init__(quality)
-
-    def mutate(self, pivot: Solution) -> List[Solution]:
-        return [Solution(self._mutation_name(name) if name else self._mutation_name(),
-                         solution,
-                         self.quality(solution))
-                for name, solution in self._permute(pivot.position)]
-
-    @abstractmethod
-    def _permute(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
-        """
-        Returns all possible permutations of 1D array
-        :param x: 1D numpy ndarray
-        :return: Collection of all possible permutations without quality
-        """
-        ...
-
-
-class CustomPermutation(PermutationMutation):
+class CustomPermutation(MutationBehaviour):
     _mutation_type = None
-    _permute = None
+    _generate_mutations = None
 
     def __init__(self, quality: Callable[[ndarray], float]):
         super().__init__(quality)
@@ -40,7 +18,7 @@ class CustomPermutation(PermutationMutation):
     @staticmethod
     def check_permutation_init(mutation):
         def check_mutate(self, pivot: Solution):
-            assert self._permute, 'Should initialize permutation function and permutation type name ' \
+            assert self._generate_mutations, 'Should initialize permutation function and permutation type name ' \
                                   'by calling class instance with custom permutation. ' \
                                   'E.g., permut = CustomPermutation(quality)(permutation, permutation_type)'
             return mutation(self, pivot)
@@ -52,13 +30,13 @@ class CustomPermutation(PermutationMutation):
         self.mutation_type = permutation_type
 
 
-class Swap2Mutation(PermutationMutation):
+class Swap2Mutation(MutationBehaviour):
     _mutation_type = 'Swap2'
 
     def __init__(self, quality: Callable[[ndarray], float]):
         super().__init__(quality)
 
-    def _permute(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
+    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
         r = []
         for i in range(len(x) - 1):
             for j in range(i + 1, len(x)):
@@ -72,7 +50,7 @@ class Swap2Mutation(PermutationMutation):
         return r
 
 
-class Swap3Mutation(PermutationMutation):
+class Swap3Mutation(MutationBehaviour):
     _mutation_type = 'Swap3Single'
     _left_direction: Optional[bool] = False
 
@@ -95,7 +73,7 @@ class Swap3Mutation(PermutationMutation):
         self._left_direction = not self._left_direction if self._left_direction is not None else None
         return self
 
-    def _permute(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
+    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
         r = []
         for i in range(len(x) - 2):
             for j in range(i + 1, len(x) - 1):
@@ -125,5 +103,3 @@ class Swap3Mutation(PermutationMutation):
             return lst[1:] + [lst[0]]
         else:
             return [lst[-1]] + lst[:-1]
-
-
