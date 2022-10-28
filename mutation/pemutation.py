@@ -103,3 +103,5 @@ class Swap3Mutation(MutationBehaviour):
             return lst[1:] + [lst[0]]
         else:
             return [lst[-1]] + lst[:-1]
+
+# TODO: implement slice shift
