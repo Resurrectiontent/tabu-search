@@ -18,14 +18,17 @@ class MutationBehaviour(ABC):
     def __init__(self, quality: Callable[[ndarray], float]):
         self.quality = quality
 
-    def mutation_name(self, *args) -> str:
-        return self.mutation_type + f'({", ".join(args)})'
-
-    @property
-    @abstractmethod
-    def mutation_type(self) -> str:
-        ...
-
     @abstractmethod
     def mutate(self, pivot: Solution) -> List[Solution]:
         ...
+
+    @property
+    @abstractmethod
+    def _mutation_type(self) -> str:
+        ...
+
+    def _mutation_name(self, *args) -> str:
+        return self._mutation_type + f'({", ".join(args)})'
+
+    def _one_solution_suffix(*args) -> str:
+        return ','.join(map(str, args))
