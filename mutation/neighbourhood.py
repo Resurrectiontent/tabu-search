@@ -41,3 +41,8 @@ class FullAxisShiftMutation(BidirectionalMutationBehaviour):
 
         return self._one_solution_suffix('-' if negative else '+'), op(x)
 
+# TODO: implement PivotOppositeShiftMutation,
+#  when all elements before some index are shifted one side,
+#  and all elements after shifted opposite side.
+#  [0, 0, 0, 0, 0] -> PivotOppositeShiftMutation(2) -> [-1, -1, 0, 1, 1].
+#  Consider shifting pivot point also.
