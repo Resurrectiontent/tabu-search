@@ -16,17 +16,7 @@ class NearestNeighboursMutation(BidirectionalMutationBehaviour):
     def __init__(self, quality: Callable[[ndarray], float]):
         super().__init__(quality)
 
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
-        r = []
-
-        if self._negative_direction or self._negative_direction is None:
-            r.extend(self._generate_one_type_mutations(x, True))
-        if not self._negative_direction:
-            r.extend(self._generate_one_type_mutations(x, False))
-
-        return r
-
-    def _generate_one_type_mutations(self, x: ndarray, left: bool) -> List[Tuple[str, ndarray]]:
+    def _generate_one_direction_mutations(self, x: ndarray, left: bool) -> List[Tuple[str, ndarray]]:
         inc = partial(add, b=1)
         dec = partial(add, b=-1)
 

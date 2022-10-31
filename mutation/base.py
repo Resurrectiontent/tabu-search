@@ -46,7 +46,33 @@ class MutationBehaviour(ABC):
 
 
 class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
+    # Override one of these methods in dependence on whether mutation generates
+    #  single new instance or multiple new indices. Last tuple param is for *args.
+    #  By default, one of them is called in _generate_mutations.
+    _generate_one_direction_mutation: Callable[[ndarray, bool], Tuple[str, ndarray]]
+    _generate_one_direction_mutations: Callable[[ndarray, bool], List[Tuple[str, ndarray]]]
+
     _negative_direction = False
+
+    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
+        """
+        Default implementation for bidirectional mutations. Override, if you need to change it.
+        """
+        assert self._generate_one_direction_mutation or self._generate_one_direction_mutations, \
+            'Should implement either _generate_one_direction_mutation or _generate_one_direction_mutations methods' \
+            ' to use default logics or override _generate_mutations to implement custom logics.'
+        r = []
+
+        recorder, generator = (r.extend, self._generate_one_direction_mutations) \
+            if self._generate_one_direction_mutations \
+            else (r.append, self._generate_one_direction_mutation)
+
+        if self._negative_direction or self._negative_direction is None:
+            recorder(generator(x, True))
+        if not self._negative_direction:
+            recorder(generator(x, False))
+
+        return r
 
     def to_negative_direction(self):
         self._negative_direction = True

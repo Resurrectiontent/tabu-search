@@ -25,6 +25,7 @@ class Swap2Mutation(MutationBehaviour):
 class Swap3Mutation(BidirectionalMutationBehaviour):
     _mutation_type = 'Swap3Single'
 
+    # Override default logics to reduce cycle initializations
     def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
         r = []
         for i in range(len(x) - 2):
