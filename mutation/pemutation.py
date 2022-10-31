@@ -1,35 +1,8 @@
-from typing import Iterable, Callable, Tuple, Optional
+from typing import Iterable, Callable, Tuple
 
 from numpy import ndarray
 
-from mutation.base import MutationBehaviour, Solution
-
-
-# TODO: make CustomMutation
-#  move to mutation/base.py
-class CustomPermutation(MutationBehaviour):
-    _mutation_type = None
-    _generate_mutations = None
-
-    def __init__(self, quality: Callable[[ndarray], float]):
-        super().__init__(quality)
-
-        # decorate mutation
-        self.mutate = self.check_permutation_init(self.mutate)
-
-    @staticmethod
-    def check_permutation_init(mutation):
-        def check_mutate(self, pivot: Solution):
-            assert self._generate_mutations, 'Should initialize permutation function and permutation type name ' \
-                                  'by calling class instance with custom permutation. ' \
-                                  'E.g., permut = CustomPermutation(quality)(permutation, permutation_type)'
-            return mutation(self, pivot)
-
-        return check_mutate
-
-    def __call__(self, permutation: Callable[[ndarray], Iterable[Tuple[str, ndarray]]], permutation_type: str):
-        self._permute = permutation
-        self.mutation_type = permutation_type
+from mutation.base import MutationBehaviour, BidirectionalMutationBehaviour
 
 
 class Swap2Mutation(MutationBehaviour):
@@ -52,28 +25,11 @@ class Swap2Mutation(MutationBehaviour):
         return r
 
 
-class Swap3Mutation(MutationBehaviour):
+class Swap3Mutation(BidirectionalMutationBehaviour):
     _mutation_type = 'Swap3Single'
-    _left_direction: Optional[bool] = False
 
     def __init__(self, quality: Callable[[ndarray], float]):
         super().__init__(quality)
-
-    def to_left_direction(self):
-        self._left_direction = True
-        return self
-
-    def to_right_direction(self):
-        self._left_direction = False
-        return self
-
-    def to_bidirectional(self):
-        self._left_direction = None
-        return self
-
-    def reverse_direction(self):
-        self._left_direction = not self._left_direction if self._left_direction is not None else None
-        return self
 
     def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
         r = []
@@ -87,9 +43,9 @@ class Swap3Mutation(MutationBehaviour):
         return r
 
     def _add_permute(self, container, x, idx, values):
-        if self._left_direction or self._left_direction is None:
+        if self._negative_direction or self._negative_direction is None:
             container.append(self._generate_one_permute(x, idx, values, True))
-        if not self._left_direction:
+        if not self._negative_direction:
             container.append(self._generate_one_permute(x, idx, values, False))
 
     def _generate_one_permute(self, x, idx, values, left: bool) -> Tuple[str, ndarray]:

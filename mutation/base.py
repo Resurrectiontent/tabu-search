@@ -43,3 +43,23 @@ class MutationBehaviour(ABC):
 
     def _one_solution_suffix(*args) -> str:
         return ','.join(map(str, args))
+
+
+class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
+    _negative_direction = False
+
+    def to_negative_direction(self):
+        self._negative_direction = True
+        return self
+
+    def to_positive_direction(self):
+        self._negative_direction = False
+        return self
+
+    def to_bidirectional(self):
+        self._negative_direction = None
+        return self
+
+    def reverse_direction(self):
+        self._negative_direction = not self._negative_direction if self._negative_direction is not None else None
+        return self
