@@ -1,6 +1,6 @@
 from functools import partial
 from operator import add
-from typing import Iterable, Tuple, Callable, List
+from typing import Tuple, Callable, List
 
 from numpy import ndarray
 

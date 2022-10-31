@@ -57,4 +57,5 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
         else:
             return [lst[-1]] + lst[:-1]
 
-# TODO: implement slice shift
+# TODO: implement Permute1Mutation
+#  [1,2,3,4,5,6,7,8,9,0] -> Permute1Mutation(5, 2) -> [0,1,6,3,4,5,7,8,9,0]
