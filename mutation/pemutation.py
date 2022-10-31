@@ -43,11 +43,11 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
         if not self._negative_direction:
             container.append(self._generate_one_permute(x, idx, values, False))
 
-    def _generate_one_permute(self, x, idx, values, left: bool) -> Tuple[str, ndarray]:
-        values = self._rotate(values, left)
+    def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[str, ndarray]:
+        values = self._rotate(values, negative)
         x = x.copy()
         x[idx] = values
-        n = self._one_solution_suffix('l' if left else 'r', *idx)
+        n = self._one_solution_suffix('l' if negative else 'r', *idx)
         return n, x
 
     @staticmethod
