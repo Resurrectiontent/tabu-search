@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Callable, Iterable, Tuple
 
 from numpy import ndarray
@@ -24,6 +25,7 @@ class CustomMutation(MutationBehaviour):
 
     @staticmethod
     def check_mutation_inited(mutation):
+        @wraps(mutation)
         def check_mutate(self, pivot: Solution):
             assert self._generate_mutations, 'Should initialize mutation function and mutation type name ' \
                                   'by calling class instance with custom mutation. ' \

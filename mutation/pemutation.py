@@ -6,6 +6,9 @@ from mutation.base import MutationBehaviour, BidirectionalMutationBehaviour
 
 
 class Swap2Mutation(MutationBehaviour):
+    """
+    Implements mutation behaviour, in which all pairs of (non-equal) elements are permuted in different solutions.
+    """
     _mutation_type = 'Swap2'
 
     def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
@@ -23,6 +26,11 @@ class Swap2Mutation(MutationBehaviour):
 
 
 class Swap3Mutation(BidirectionalMutationBehaviour):
+    """
+    Implements mutation behaviour, in which all triplets (without equal elements)
+    can be permuted in all two possible ways:
+    ```([1,2,3] -> [2,3,1] and/or [3,1,2])``` in different solutions.
+    """
     _mutation_type = 'Swap3Single'
 
     # Override default logics to reduce cycle initializations
@@ -57,5 +65,5 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
         else:
             return [lst[-1]] + lst[:-1]
 
-# TODO: implement Permute1Mutation
-#  [1,2,3,4,5,6,7,8,9,0] -> Permute1Mutation(5, 2) -> [0,1,6,3,4,5,7,8,9,0]
+# TODO: implement Reposition1Mutation
+#  [1,2,3,4,5,6,7,8,9,0] -> Reposition1Mutation(5, 2) -> [0,1,6,3,4,5,7,8,9,0]
