@@ -1,4 +1,4 @@
-from typing import Iterable, Callable, Tuple
+from typing import Iterable, Tuple
 
 from numpy import ndarray
 
@@ -7,9 +7,6 @@ from mutation.base import MutationBehaviour, BidirectionalMutationBehaviour
 
 class Swap2Mutation(MutationBehaviour):
     _mutation_type = 'Swap2'
-
-    def __init__(self, quality: Callable[[ndarray], float]):
-        super().__init__(quality)
 
     def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
         r = []
@@ -27,9 +24,6 @@ class Swap2Mutation(MutationBehaviour):
 
 class Swap3Mutation(BidirectionalMutationBehaviour):
     _mutation_type = 'Swap3Single'
-
-    def __init__(self, quality: Callable[[ndarray], float]):
-        super().__init__(quality)
 
     def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
         r = []
