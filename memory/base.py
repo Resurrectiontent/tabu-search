@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from copy import copy
 from operator import itemgetter
-from typing import List, Set, Iterable, Callable
+from typing import List, Set, Iterable, Callable, Generic
 
 from mutation.base import Solution, TMoveId
 
 
-class MemoryCriterion(ABC):
-    _moves: List[Solution]
-    _move_idx: Set[TMoveId]
+class MemoryCriterion(ABC, Generic[TMoveId]):
+    _solution_history: List[Solution]
+    _solution_idx_history: Set[TMoveId]
     # TODO: Consider more elegant implementation
     _solution_id_getter: Callable[[Solution], TMoveId]
 
@@ -22,8 +22,8 @@ class MemoryCriterion(ABC):
         ...
 
     def memorize(self, move: Solution):
-        self._moves.append(move)
-        self._move_idx.update(self._solution_id_getter(move))
+        self._solution_history.append(move)
+        self._solution_idx_history.update(self._solution_id_getter(move))
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
         good_idx, move_idx = self._get_all_and_good_move_idx(x)
