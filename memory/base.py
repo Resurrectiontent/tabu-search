@@ -12,12 +12,11 @@ class MemoryCriterion(ABC):
     # TODO: Consider more elegant implementation
     _solution_id_getter: Callable[[Solution], TMoveId]
 
-    # TODO: consider taking set of solutions to broaden implementation possibilities.
     @abstractmethod
-    def _criterion(self, x_idx: Set[TMoveId]) -> Set[TMoveId]:
+    def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
         """
-        Returns a set of ids, which corresponds to this criterion type. The set can have intersection with x_idx
-        :param x_idx:
+        Returns a set of ids, which allowed by this criterion type. The set can have intersection with ids of x
+        :param x:
         :return:
         """
         ...
@@ -32,7 +31,7 @@ class MemoryCriterion(ABC):
 
     def _filter_list_idx(self, x: Iterable[Solution]) -> Set[int]:
         """
-        Like filter, but uses solutions ids in ordered list, rather then solution ids via _solution_id_getter
+        Like filter, but uses solutions ids in ordered list, rather than solution ids via _solution_id_getter
         :param x:
         :return:
         """
@@ -46,8 +45,8 @@ class MemoryCriterion(ABC):
 
     def _negate_criterion(self):
         def negated_criterion(criterion):
-            def wrapper(self, x: Set[TMoveId]) -> Set[TMoveId]:
-                return x.difference(criterion(self, x))
+            def wrapper(_self: MemoryCriterion, x: Iterable[Solution]) -> Set[TMoveId]:
+                return {_self._solution_id_getter(el) for el in x}.difference(criterion(_self, x))
 
             return wrapper
 
