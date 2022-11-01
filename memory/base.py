@@ -6,11 +6,18 @@ from typing import List, Set, Iterable, Callable, Generic
 from mutation.base import Solution, TMoveId
 
 
+# TODO: extract general (for MemoryCriterion and CumulativeMemoryCriterion into a separate class
+#  to avoid "# noninspection PyMissingConstructor" in CumulativeMemoryCriterion
 class MemoryCriterion(ABC, Generic[TMoveId]):
     _solution_history: List[Solution]
     _solution_idx_history: Set[TMoveId]
     # TODO: Consider more elegant implementation
     _solution_id_getter: Callable[[Solution], TMoveId]
+
+    def __init__(self, solution_id_getter: Callable[[Solution], TMoveId]):
+        self._solution_id_getter = solution_id_getter
+        self._solution_history = []
+        self._solution_idx_history = set()
 
     @abstractmethod
     def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
@@ -68,6 +75,8 @@ class CumulativeMemoryCriterion(MemoryCriterion):
     """
     Used to accumulate multiple memory criteria
     """
+
+    # noinspection PyMissingConstructor
     def __init__(self, operation: Callable[[Set[TMoveId], Set[TMoveId]], Set[TMoveId]], *criteria):
         assert len(criteria) > 0
 
