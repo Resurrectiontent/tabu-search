@@ -91,6 +91,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
 
         return r
 
+    # TODO: consider replacing with functools.partialmethod
     def to_negative_direction(self):
         """
         Forces bidirectional mutation to work in negative direction
