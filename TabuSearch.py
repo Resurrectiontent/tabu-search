@@ -1,32 +1,36 @@
 from abc import ABC
-from typing import Generic, TypeVar, Dict, Iterable, Callable, Tuple, List
+from itertools import chain
+from typing import Iterable, Callable
 
 from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
 from memory.base import MemoryCriterion
-from mutation.base import Solution
-
-# TODO: Consider introducing separate class for quality instead of float
-
-# TODO: Consider designing separate class for tabu list
-TL = TypeVar('TL')  # Tabu list
+from mutation.base import Solution, MutationBehaviour
 
 
-class TabuSearch(ABC, Generic[TL]):
+# TODO: [1] Consider moving from OO class schema to functional paradigm
+#  in order to improve execution performance.
+
+# TODO: [2] Consider introducing separate class for quality instead of float
+
+
+class TabuSearch(ABC):
+    # TODO: store best solution. Consider several best, if needed.
+    # TODO: consider storing current solution
     convergence_criterion: ConvergenceCriterion
-    possible_moves: Dict[str, Callable[[ndarray], Iterable[ndarray]]]
+    mutation_behaviour: Iterable[MutationBehaviour]
     quality: Callable[[ndarray], float]
     _aspiration: MemoryCriterion
     _tabu: MemoryCriterion
 
     def optimize(self, x0: ndarray):
-        x = x0
+        # TODO: convert x0 to solution
+        x: Solution = x0
 
         while True:
             neighbours = self.get_neighbours(x)
             x, move = self.choose(neighbours)
-            self.make_tick()
             self.memorize_move(move)
 
             if self.converged():
@@ -34,25 +38,23 @@ class TabuSearch(ABC, Generic[TL]):
 
         return x
 
-    def get_neighbours(self, x) -> Dict[str, List[Tuple[ndarray, ndarray]]]:
-        possible_moves = {move: func(x) for move, func in self.possible_moves.items()}
-        # TODO: consider calculating quality for aspiration
-        # TODO: account tabu-list and aspiration memory
+    def get_neighbours(self, x: Solution) -> Iterable[Solution]:
+        possible_moves = chain(*[behaviour.mutate(x) for behaviour in self.mutation_behaviour])
+        # TODO: account tabu-list, momentum (mid-term) and aspiration memory
+        #  for getting all possible (best) members
         ...
 
     def choose(self, neighbours) -> tuple:
         # TODO: sort by quality, probabilistically (statistically) make a choice
         ...
 
-    def make_tick(self):
-        # TODO: pop tabu-list
-        ...
-
     def memorize_move(self, move: Solution):
-        # TODO: push tabu-list, mid-term memory
+        # TODO: update memory
+        #  to drop old and store new into the tabu-list, scale momentum and update aspiration.
+        #  Also, update best solution, metric and id
         self._tabu.memorize(move)
         self._aspiration.memorize(move)
 
     def converged(self):
-        # TODO: update argument
+        # TODO: pass the proper argument to convergence criterion
         return self.convergence_criterion.converged()
