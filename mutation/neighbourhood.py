@@ -4,7 +4,7 @@ from typing import Tuple, List
 
 from numpy import ndarray
 
-from mutation.base import BidirectionalMutationBehaviour
+from mutation.directed import BidirectionalMutationBehaviour
 
 
 class NearestNeighboursMutation(BidirectionalMutationBehaviour):

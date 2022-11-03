@@ -2,7 +2,8 @@ from typing import Iterable, Tuple
 
 from numpy import ndarray
 
-from mutation.base import MutationBehaviour, BidirectionalMutationBehaviour
+from mutation.base import MutationBehaviour
+from mutation.directed import BidirectionalMutationBehaviour
 
 
 class Swap2Mutation(MutationBehaviour):
@@ -46,9 +47,9 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
         return r
 
     def _add_permute(self, container, x, idx, values):
-        if self._negative_direction or self._negative_direction is None:
+        if self.direction.is_negative:
             container.append(self._generate_one_permute(x, idx, values, True))
-        if not self._negative_direction:
+        if self.direction.is_positive:
             container.append(self._generate_one_permute(x, idx, values, False))
 
     def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[str, ndarray]:
