@@ -1,21 +1,12 @@
 from abc import ABC
 from enum import IntEnum
-from functools import partialmethod, wraps
+from functools import partialmethod
 from typing import Callable, Tuple, List, Iterable
 
 from numpy import ndarray
 
 from mutation.base import MutationBehaviour
-
-
-def return_self_method(func):
-    assert callable(func), f'Argument func should be callable. Type {type(func).__name__} is not callable.'
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        func(*args, **kwargs)
-        return func.__self__
-    return wrapper
+from utils.decorators import return_self_method
 
 
 class MutationDirection(IntEnum):
