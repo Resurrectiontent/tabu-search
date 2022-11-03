@@ -12,12 +12,9 @@ class AggregatedConvergence(ConvergenceCriterion, ABC):
 
 
 class ConjunctiveConvergence(AggregatedConvergence):
-    def __init__(self, *args):
-        """
-        Initializes conjunctive Convergence. Converges, when all memory from *args converge.
-        :param args: Convergences to account.
-        """
-        super().__init__(*args)
+    """
+    Conjunctive Convergence. Converges, when all memory from *args converge.
+    """
 
     def converged(self, **kwargs):
         """
@@ -29,12 +26,9 @@ class ConjunctiveConvergence(AggregatedConvergence):
 
 
 class DisjunctiveConvergence(AggregatedConvergence):
-    def __init__(self, *args):
-        """
-        Initializes disjunctive convergence. Converges, when any memory from *args converged.
-        :param args: Convergences to account.
-        """
-        super().__init__(*args)
+    """
+    Disjunctive convergence. Converges, when any memory from *args converged.
+    """
 
     def converged(self, **kwargs) -> bool:
         """
