@@ -5,6 +5,7 @@ from mutation.base import Solution, TMoveId
 
 
 class TabuList(MemoryCriterion):
+
     _timers: List[int]
     _tabu_time_getter:  Callable[[Solution], int]
 
@@ -13,6 +14,9 @@ class TabuList(MemoryCriterion):
         self._tabu_time_getter = tabu_time_getter
 
     def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
+        pass
+
+    def _memorize(self, move: Solution):
         pass
 
     ...

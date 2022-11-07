@@ -28,9 +28,14 @@ class MemoryCriterion(ABC, Generic[TMoveId]):
         """
         ...
 
+    @abstractmethod
+    def _memorize(self, move: Solution):
+        ...
+
     def memorize(self, move: Solution):
         self._solution_history.append(move)
         self._solution_idx_history.update(self._solution_id_getter(move))
+        self._memorize(move)
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
         good_idx, move_idx = self._get_all_and_good_move_idx(x)
