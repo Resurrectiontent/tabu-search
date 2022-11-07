@@ -1,4 +1,4 @@
-from typing import Iterable, Set, List, Callable
+from typing import Iterable, Set, List, Callable, Dict
 
 from memory.base import MemoryCriterion
 from mutation.base import Solution, TMoveId
@@ -6,7 +6,7 @@ from mutation.base import Solution, TMoveId
 
 class TabuList(MemoryCriterion):
 
-    _timers: List[int]
+    _timers: Dict[TMoveId int]
     _tabu_time_getter:  Callable[[Solution], int]
 
     def __init__(self, solution_id_getter: Callable[[Solution], TMoveId], tabu_time_getter: Callable[[Solution], int]):
@@ -17,6 +17,8 @@ class TabuList(MemoryCriterion):
         pass
 
     def _memorize(self, move: Solution):
+        # TODO: propagate timer tick
+        self._timers[self._solution_id_getter(move)] = self._tabu_time_getter(move)
         pass
 
     ...
