@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from copy import copy
-from functools import wraps
+from functools import wraps, reduce
 from operator import itemgetter
 from typing import List, Set, Iterable, Callable, Generic, Tuple
 
@@ -155,11 +155,8 @@ class CumulativeMemoryCriterion(BaseMemoryCriterion[TMoveId]):
 
     def _filter_list_idx(self, x: Iterable[Solution]) -> Set[int]:
         x = x if isinstance(x, list) else list(x)
-        res = self._criteria[0]._filter_list_idx(x)
 
-        for c in self._criteria[1:]:
-            res = self._operation(res, c._filter_list_idx(x))
-
+        res = reduce(self._operation, [c._filter_list_idx(x) for c in self._criteria])
         return set(range(len(x))).difference(res) if self._inverted else res
 
     def _negate_criterion(self):
