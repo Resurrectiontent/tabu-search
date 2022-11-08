@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from copy import copy
+from functools import wraps
 from operator import itemgetter
-from typing import List, Set, Iterable, Callable, Generic
+from typing import List, Set, Iterable, Callable, Generic, Tuple
 
 from mutation.base import Solution, TMoveId
 
@@ -15,6 +16,8 @@ class MemoryCriterion(ABC, Generic[TMoveId]):
     _solution_id_getter: Callable[[Solution], TMoveId]
 
     def __init__(self, solution_id_getter: Callable[[Solution], TMoveId]):
+        self._inverted = False
+
         self._solution_id_getter = solution_id_getter
         self._solution_history = []
         self._solution_idx_history = set()
@@ -30,14 +33,27 @@ class MemoryCriterion(ABC, Generic[TMoveId]):
 
     @abstractmethod
     def _memorize(self, move: Solution):
+        """
+        Implementation-specific part of move memorization.
+        :param move: The selected solution.
+        """
         ...
 
     def memorize(self, move: Solution):
+        """
+        Memories selected move to account it in memory criterion logics. Also, makes a "tick".
+        :param move: The selected solution to memorize.
+        """
         self._solution_history.append(move)
         self._solution_idx_history.update(self._solution_id_getter(move))
         self._memorize(move)
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
+        """
+        Filters solutions due to conditions of the MemoryCriterion.
+        :param x: Proposed set (collection) of solutions.
+        :return: Subset of allowed solutions.
+        """
         good_idx, move_idx = self._get_all_and_good_move_idx(x)
         return [move for move, idx in zip(x, move_idx) if idx in good_idx]
 
@@ -50,27 +66,49 @@ class MemoryCriterion(ABC, Generic[TMoveId]):
         good_idx, move_idx = self._get_all_and_good_move_idx(x)
         return {i for i, idx in enumerate(move_idx) if idx in good_idx}
 
-    def _get_all_and_good_move_idx(self, x: Iterable[Solution]):
+    def _get_all_and_good_move_idx(self, x: Iterable[Solution]) -> Tuple[Set[TMoveId], List[TMoveId]]:
         move_idx = [self._solution_id_getter(move) for move in x]
         good_idx = self._criterion(set(move_idx))
         return good_idx, move_idx
 
     def _negate_criterion(self):
+        """
+        Negates criterion, i.e. subtracts its former return value from the input set of solutions.
+        """
+
         def negated_criterion(criterion):
+            @wraps(criterion)
             def wrapper(_self: MemoryCriterion, x: Iterable[Solution]) -> Set[TMoveId]:
                 return {_self._solution_id_getter(el) for el in x}.difference(criterion(_self, x))
 
             return wrapper
 
-        self._criterion = negated_criterion(self._criterion)
+        self._criterion = self._criterion.__wrapped__ \
+            if self._inverted else \
+            negated_criterion(self._criterion)
+        self._inverted = not self._inverted
 
     def __and__(self, other: 'MemoryCriterion') -> 'MemoryCriterion':
+        """
+        Represents union of criteria.
+        :param other: other criterion
+        :return: CumulativeMemoryCriterion, which `.filter()` returns union of sets, filtered by the criteria.
+        """
         return CumulativeMemoryCriterion(set.union, self, other)
 
     def __or__(self, other: 'MemoryCriterion') -> 'MemoryCriterion':
+        """
+        Represents intersection of criteria.
+        :param other: other criterion
+        :return: CumulativeMemoryCriterion, which `.filter()` returns intersection of sets, filtered by the criteria.
+        """
         return CumulativeMemoryCriterion(set.intersection, self, other)
 
     def __invert__(self) -> 'MemoryCriterion':
+        """
+        Represents criterion negation.
+        :return: Copy of the criterion with inverted filtering.
+        """
         result = copy(self)
         result._negate_criterion()
         return result
@@ -85,9 +123,10 @@ class CumulativeMemoryCriterion(MemoryCriterion):
     def __init__(self, operation: Callable[[Set[TMoveId], Set[TMoveId]], Set[TMoveId]], *criteria):
         assert len(criteria) > 0
 
+        self._inverted = False
+
         self._operation = operation
         self._criteria: List[MemoryCriterion] = list(criteria)
-        self._inverted = False
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
         good_list_idx = self._filter_list_idx(x)
@@ -110,5 +149,9 @@ class CumulativeMemoryCriterion(MemoryCriterion):
         self._inverted = not self._inverted
 
     def _criterion(self, x_idx: Set[TMoveId]) -> Set[TMoveId]:
+        # Should never be called
+        raise NotImplementedError('No implementation for cumulative CumulativeMemoryCriterion _criterion')
+
+    def _memorize(self, move: Solution):
         # Should never be called
         raise NotImplementedError('No implementation for cumulative CumulativeMemoryCriterion _criterion')

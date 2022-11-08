@@ -5,6 +5,9 @@ from mutation.base import Solution, TMoveId
 
 
 class TabuList(MemoryCriterion):
+    """
+    Represents short-term memory in Tabu Search algorithm (tabu list).
+    """
 
     _timers: Dict[TMoveId, int]
     _tabu_time_getter:  Callable[[Solution], int]
@@ -14,10 +17,9 @@ class TabuList(MemoryCriterion):
         self._tabu_time_getter = tabu_time_getter
 
     def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
-        pass
+        return
 
     def _memorize(self, move: Solution):
-        # TODO: test
         for k, v in list(self._timers.items()):
             if v == 1:
                 del self._timers[k]

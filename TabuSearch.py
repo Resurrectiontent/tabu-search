@@ -9,8 +9,7 @@ from memory.base import MemoryCriterion
 from mutation.base import Solution, MutationBehaviour
 
 
-# TODO: [1] Consider moving from OO class schema to functional paradigm
-#  in order to improve execution performance.
+# TODO: [1] Introduce SolutionFactory to avoid solution_id_getter's
 
 # TODO: [2] Consider introducing separate class for quality instead of float
 
@@ -18,6 +17,7 @@ from mutation.base import Solution, MutationBehaviour
 class TabuSearch(ABC):
     # TODO: store best solution. Consider several best, if needed.
     # TODO: consider storing current solution
+    # TODO: introduce one cumulative memory criterion
     convergence_criterion: ConvergenceCriterion
     mutation_behaviour: Iterable[MutationBehaviour]
     quality: Callable[[ndarray], float]
@@ -40,7 +40,7 @@ class TabuSearch(ABC):
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
         possible_moves = chain(*[behaviour.mutate(x) for behaviour in self.mutation_behaviour])
-        # TODO: account tabu-list, momentum (mid-term) and aspiration memory
+        # TODO: use one cumulative memory criterion: account tabu-list, momentum (mid-term) and aspiration memory
         #  for getting all possible (best) members
         ...
 
