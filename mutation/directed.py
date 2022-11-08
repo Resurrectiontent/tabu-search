@@ -1,7 +1,7 @@
 from abc import ABC
 from enum import IntEnum
 from functools import partialmethod
-from typing import Callable, Tuple, List, Iterable
+from typing import Callable, Tuple, List, Iterable, Optional
 
 from numpy import ndarray
 
@@ -47,7 +47,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
 
     _direction: MutationDirection = MutationDirection.Positive
 
-    def __init__(self, quality: Callable[[ndarray], float], mutation_direction: MutationDirection = None):
+    def __init__(self, quality: Callable[[ndarray], float], mutation_direction: Optional[MutationDirection] = None):
         """
         Initializes BidirectionalMutationBehaviour.
         :param quality: Quality function for evaluating proposed solutions.
