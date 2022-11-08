@@ -1,3 +1,4 @@
+# TODO: rename file
 from abc import ABC
 from itertools import chain
 from typing import Iterable, Callable
@@ -11,7 +12,7 @@ from mutation.base import Solution, MutationBehaviour
 
 # TODO: [1] Introduce SolutionFactory to avoid solution_id_getter's
 
-# TODO: [2] Consider introducing separate class for quality instead of float
+# TODO: [2] Consider introducing separate class for quality metric value instead of float
 
 
 class TabuSearch(ABC):

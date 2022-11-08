@@ -1,0 +1,41 @@
+from abc import ABC
+from enum import Enum, auto
+from operator import gt, ge
+from typing import Iterable, Set, Callable, Optional
+
+from numpy import NAN
+
+from memory.base import MemoryCriterion
+from mutation.base import Solution, TMoveId
+
+
+class AspirationBoundType(Enum):
+    Greater = auto()
+    GreaterEquals = auto()
+
+
+class AspirationCriterion(MemoryCriterion, ABC):
+    _solution_aspiration_getter: Callable[[Solution], float]
+    _aspiration_bound: float
+    _aspiration_comparison: Callable[[float, float], bool]
+
+    def __init__(self, solution_id_getter: Callable[[Solution], TMoveId],
+                 solution_aspiration_getter: Callable[[Solution], float],
+                 bound_type: Optional[AspirationBoundType] = AspirationBoundType.Greater):
+        super().__init__(solution_id_getter)
+
+        self._solution_aspiration_getter = solution_aspiration_getter
+        self._aspiration_comparison = gt if bound_type is AspirationBoundType.Greater else ge
+        self._aspiration_bound = NAN
+
+    def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
+        return {self._solution_id_getter(s) for s in x} \
+            if self._aspiration_bound is NAN \
+            else {self._solution_id_getter(s)
+                  for s in x
+                  if self._aspiration_comparison(self._solution_aspiration_getter(s), self._aspiration_bound)}
+
+    def _memorize(self, move: Solution):
+        move_aspiration = self._solution_aspiration_getter(move)
+        if self._aspiration_comparison(move_aspiration, self._aspiration_bound):
+            self._aspiration_bound = move_aspiration
