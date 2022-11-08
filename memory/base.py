@@ -73,6 +73,7 @@ class BaseMemoryCriterion(ABC, Generic[TMoveId]):
 class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
     # TODO: Consider more elegant implementation
     _solution_id_getter: Callable[[Solution], TMoveId]
+    # TODO: Consider dropping, if not needed + consider moving logics from `_memorize` to `memorize`
     _solution_history: List[Solution]
     _solution_idx_history: Set[TMoveId]
 
