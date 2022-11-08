@@ -17,7 +17,7 @@ class TabuList(MemoryCriterion):
         self._tabu_time_getter = tabu_time_getter
 
     def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
-        return
+        return {id_ for id_ in [self._solution_id_getter(s) for s in x] if id_ not in self._timers}
 
     def _memorize(self, move: Solution):
         for k, v in list(self._timers.items()):
