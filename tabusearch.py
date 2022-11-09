@@ -1,4 +1,3 @@
-# TODO: rename file
 from abc import ABC
 from itertools import chain
 from typing import Iterable, Callable
