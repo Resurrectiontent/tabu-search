@@ -6,6 +6,9 @@ from numpy import ndarray
 
 from mutation.directed import BidirectionalMutationBehaviour
 
+# TODO: consider moving from classes to functions, passed to superclass ctor
+#  (as these classes implement only one function)
+
 
 class NearestNeighboursMutation(BidirectionalMutationBehaviour):
     """

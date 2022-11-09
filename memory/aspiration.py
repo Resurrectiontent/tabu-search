@@ -8,6 +8,8 @@ from numpy import NAN
 from memory.base import MemoryCriterion
 from mutation.base import Solution, TMoveId
 
+# TODO: introduce library of solution aspiration getters and a convenient way to pass them to AspirationCriterion ctor
+
 
 class AspirationBoundType(Enum):
     Greater = auto()

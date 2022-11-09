@@ -3,6 +3,8 @@ from typing import Iterable, Set, List, Callable, Dict
 from memory.base import MemoryCriterion
 from mutation.base import Solution, TMoveId
 
+# TODO: introduce library of tabu time getters and a convenient way to pass them to TabuList ctor
+
 
 class TabuList(MemoryCriterion):
     """
