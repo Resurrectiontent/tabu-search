@@ -1,30 +1,24 @@
-from typing import Callable, TypeVar, Union, Optional
+from abc import ABC, abstractmethod
 
 
 # TODO: implement SolutionQualityFactory
-# TODO: implement AggregateSolutionQuality and different aggregation types
-
-TData = TypeVar('TData')
 
 
-class SolutionQuality:
-    def __init__(self, name: str,
-                 data: TData,
-                 float_: Union[float, int, Callable[[TData], float]],
-                 maximize: Optional[bool] = False,
-                 str_: Optional[Union[str, Callable[[TData], float]]] = str):
+class BaseSolutionQualityMetric(ABC):
+    """
+    Maximized quality metric. I.e., `better_solution_quality_metric > worse_solution_quality_metric`
+    """
+    def __init__(self, name: str, value_str: str):
         self.name = name
-        self._data = data
-        self._float = float_(data) if callable(float_) else float_
-        self._maximize = maximize
-        self._str = str_(data) if callable(str_) else str_
+        self._str = value_str
 
+    @abstractmethod
     def __float__(self) -> float:
         """
         Float representation of the solution quality.
         Comparable with float representations of solution quality objects of same types.
         """
-        return self._float
+        ...
 
     def __str__(self) -> str:
         """
