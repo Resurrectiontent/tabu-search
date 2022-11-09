@@ -4,7 +4,8 @@ from functools import wraps, reduce
 from operator import itemgetter
 from typing import List, Set, Iterable, Callable, Generic, Tuple
 
-from mutation.base import Solution, TMoveId
+from mutation.base import TMoveId
+from solution.base import Solution
 
 
 class BaseMemoryCriterion(ABC, Generic[TMoveId]):

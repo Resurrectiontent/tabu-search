@@ -1,17 +1,11 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import List, Callable, Hashable, TypeVar, Iterable, Tuple, Optional
 
 from numpy import ndarray
 
+from solution.base import Solution
+
 TMoveId = TypeVar('TMoveId', bound=Hashable)
-
-
-@dataclass
-class Solution:
-    name: str
-    position: ndarray
-    quality: float
 
 
 class MutationBehaviour(ABC):

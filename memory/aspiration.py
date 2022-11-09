@@ -6,7 +6,9 @@ from typing import Iterable, Set, Callable, Optional
 from numpy import NAN
 
 from memory.base import MemoryCriterion
-from mutation.base import Solution, TMoveId
+from mutation.base import TMoveId
+from solution.base import Solution
+
 
 # TODO: introduce library of solution aspiration getters and a convenient way to pass them to AspirationCriterion ctor
 

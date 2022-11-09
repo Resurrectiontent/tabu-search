@@ -6,7 +6,8 @@ from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
 from memory.base import MemoryCriterion
-from mutation.base import Solution, MutationBehaviour
+from mutation.base import MutationBehaviour
+from solution.base import Solution
 
 
 # TODO: [1] Introduce SolutionFactory to avoid solution_id_getter's

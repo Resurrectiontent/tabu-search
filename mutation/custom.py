@@ -3,7 +3,8 @@ from typing import Callable, Iterable, Tuple
 
 from numpy import ndarray
 
-from mutation.base import MutationBehaviour, Solution
+from mutation.base import MutationBehaviour
+from solution.base import Solution
 
 
 class CustomMutation(MutationBehaviour):
