@@ -1,10 +1,11 @@
+from functools import partial
 from typing import Union, Callable, Optional, TypeVar
+
+from numpy import NAN
 
 from solution.quality.base import BaseSolutionQualityMetric
 
 TData = TypeVar('TData')
-
-# TODO: implement LazySolutionQualityMetric
 
 
 class SolutionQualityMetric(BaseSolutionQualityMetric):
@@ -14,11 +15,23 @@ class SolutionQualityMetric(BaseSolutionQualityMetric):
                  minimized: Optional[bool] = False,
                  value_str: Optional[Union[str, Callable[[TData], float]]] = str):
         value_str = value_str(data) if callable(value_str) else value_str
-        super().__init__(name, value_str)
+        super().__init__(f'{name}({"min" if minimized else "max"})', value_str)
 
         self._data = data
-        self._float = float_(data) if callable(float_) else float_
+        self._float_f, self._float_n = (partial(float_, data), NAN) if callable(float_) else (None, float_)
         self._minimized = minimized
+
+    @property
+    def _float(self):
+        if self._float_n is NAN:
+            self._float_n = self._float_f()
+        return self._float_n
+
+    def _equals_to(self, other) -> bool:
+        return float(self) == float(other)
+
+    def _less_than(self, other) -> bool:
+        return float(self) < float(other)
 
     def __float__(self) -> float:
         """

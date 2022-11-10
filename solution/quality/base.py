@@ -13,10 +13,20 @@ class BaseSolutionQualityMetric(ABC):
         self._str = value_str
 
     @abstractmethod
-    def __float__(self) -> float:
+    def _equals_to(self, other) -> bool:
         """
-        Float representation of the solution quality.
-        Comparable with float representations of solution quality objects of same types.
+        Compares solution qualities of same types.
+        :param other: Comparable.
+        :return: Whether this solution quality equals to `other' solution.
+        """
+        ...
+
+    @abstractmethod
+    def _less_than(self, other) -> bool:
+        """
+        Compares solution qualities of same types.
+        :param other: Comparable.
+        :return: Whether this solution quality is worse than `other' solution.
         """
         ...
 
@@ -24,7 +34,10 @@ class BaseSolutionQualityMetric(ABC):
         """
         String exploration of the solution quality.
         """
-        return f'{self.name}: {self._str}'
+        def add_indent(s: str):
+            return s.replace('\n', '\n\t') if '\n' in s else s
+
+        return f'{self.name}: {add_indent(self._str)}'
 
     def _type_check(self, other):
         """
@@ -44,7 +57,7 @@ class BaseSolutionQualityMetric(ABC):
         :return: Whether this solution quality equals to `other' solution.
         """
         self._type_check(other)
-        return float(self) == float(other)
+        return self._equals_to(other)
 
     def __lt__(self, other) -> bool:
         """
@@ -53,4 +66,4 @@ class BaseSolutionQualityMetric(ABC):
         :return: Whether this solution quality is worse than `other' solution.
         """
         self._type_check(other)
-        return float(self) < float(other)
+        return self._less_than(other)
