@@ -3,12 +3,12 @@ from typing import Union, Callable, Optional, TypeVar
 
 from numpy import NAN
 
-from solution.quality.base import BaseSolutionQualityMetric
+from solution.quality.base import BaseSolutionQualityInfo
 
 TData = TypeVar('TData')
 
 
-class SolutionQualityMetric(BaseSolutionQualityMetric):
+class SolutionQualityInfo(BaseSolutionQualityInfo):
     def __init__(self, name: str,
                  data: TData,
                  float_: Union[float, int, Callable[[TData], float]],

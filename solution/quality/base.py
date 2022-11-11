@@ -1,10 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-# TODO: implement SolutionQualityFactory
-
-
-class BaseSolutionQualityMetric(ABC):
+class BaseSolutionQualityInfo(ABC):
     """
     Maximized quality metric. I.e., `better_solution_quality_metric > worse_solution_quality_metric`
     """
