@@ -10,7 +10,7 @@ class SolutionQualityFactory:
     _factory = Callable[[ndarray], BaseSolutionQualityInfo]
 
     # TODO: abstract *metrics creation to utility functions
-    #  consider introducing SolutionQualityMetric or just partial for BaseSolutionQualityInfo-inherited ctors
+    #  consider partial for BaseSolutionQualityInfo-inherited ctors
     def __init__(self, *metrics: Callable[[ndarray], BaseSolutionQualityInfo],
                  metrics_aggregation: Optional[Callable[[Iterable[BaseSolutionQualityInfo]],
                                                         BaseSolutionQualityInfo]] = None):
