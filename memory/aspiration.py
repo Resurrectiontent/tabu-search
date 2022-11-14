@@ -33,9 +33,9 @@ class AspirationCriterion(MemoryCriterion, ABC):
         self._aspiration_bound = NAN
 
     def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
-        return {self._solution_id_getter(s) for s in x} \
+        return {s.id for s in x} \
             if self._aspiration_bound is NAN \
-            else {self._solution_id_getter(s)
+            else {s.id
                   for s in x
                   if self._aspiration_comparison(self._solution_aspiration_getter(s), self._aspiration_bound)}
 

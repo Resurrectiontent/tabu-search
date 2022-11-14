@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from copy import copy
 from functools import wraps, reduce
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 from typing import List, Set, Iterable, Callable, Generic, Tuple
 
 from mutation.base import TMoveId
@@ -72,16 +72,13 @@ class BaseMemoryCriterion(ABC, Generic[TMoveId]):
 
 
 class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
-    # TODO: Consider more elegant implementation
-    _solution_id_getter: Callable[[Solution], TMoveId]
     # TODO: Consider dropping, if not needed + consider moving logics from `_memorize` to `memorize`
     _solution_history: List[Solution]
     _solution_idx_history: Set[TMoveId]
 
-    def __init__(self, solution_id_getter: Callable[[Solution], TMoveId]):
+    def __init__(self):
         super().__init__()
 
-        self._solution_id_getter = solution_id_getter
         self._solution_idx_history = set()
         self._solution_history = []
 
@@ -104,7 +101,7 @@ class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
 
     def memorize(self, move: Solution):
         self._solution_history.append(move)
-        self._solution_idx_history.update(self._solution_id_getter(move))
+        self._solution_idx_history.update([move.id])
         self._memorize(move)
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
@@ -119,7 +116,7 @@ class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
         def negated_criterion(criterion):
             @wraps(criterion)
             def wrapper(_self: MemoryCriterion, x: Iterable[Solution]) -> Set[TMoveId]:
-                return {_self._solution_id_getter(el) for el in x}.difference(criterion(_self, x))
+                return {el.id for el in x}.difference(criterion(_self, x))
 
             return wrapper
 
@@ -130,7 +127,7 @@ class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
         self._inverted = not self._inverted
 
     def _get_all_and_good_move_idx(self, x: Iterable[Solution]) -> Tuple[Set[TMoveId], List[TMoveId]]:
-        move_idx = [self._solution_id_getter(move) for move in x]
+        move_idx = attrgetter('id')(x)
         # noinspection PyArgumentList
         good_idx = self._criterion(set(move_idx))
         return good_idx, move_idx
