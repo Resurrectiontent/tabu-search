@@ -9,8 +9,8 @@ from solution.quality.base import BaseSolutionQualityInfo
 class SolutionQualityFactory:
     _factory = Callable[[ndarray], BaseSolutionQualityInfo]
 
-    # TODO: abstract *metrics creation to utility functions
-    #  consider partial for BaseSolutionQualityInfo-inherited ctors
+    # TODO: consider moving ctor logics to helper functions
+    #  and taking final `(ndarray) -> BaseSolutionQualityInfo` callable as an __init__ argument
     def __init__(self, *metrics: Callable[[ndarray], BaseSolutionQualityInfo],
                  metrics_aggregation: Optional[Callable[[Iterable[BaseSolutionQualityInfo]],
                                                         BaseSolutionQualityInfo]] = None):
