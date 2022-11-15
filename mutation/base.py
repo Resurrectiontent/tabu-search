@@ -5,6 +5,7 @@ from numpy import ndarray
 
 from solution.base import Solution
 
+# TODO: Ensure removing usage and remove
 TMoveId = TypeVar('TMoveId', bound=Hashable)
 
 

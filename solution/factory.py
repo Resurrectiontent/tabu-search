@@ -22,7 +22,11 @@ class SolutionFactory:
 
         self._quality_factory = SolutionQualityFactory(*metrics, metrics_aggregation)
 
-    def __call__(self, position: ndarray, name_suffix=None):
+    @property
+    def is_initialized(self):
+        return self._initialized
+
+    def __call__(self, position: ndarray, *name_suffix: str):
         return Solution(self._id_factory(name_suffix),
                         position,
                         self._quality_factory(position))

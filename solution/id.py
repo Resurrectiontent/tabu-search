@@ -2,8 +2,8 @@ from typing import Optional
 
 
 class SolutionId:
-    def __init__(self, parent_name: str, solution_id: Optional[str] = None):
-        self._str = f'{parent_name}({solution_id})' if solution_id else parent_name
+    def __init__(self, parent_name: str, *solution_idx: str):
+        self._str = f'{parent_name}({",".join(solution_idx)})' if len(solution_idx) else parent_name
         self._hash = hash(self._str)
 
     def __eq__(self, other: 'SolutionId'):

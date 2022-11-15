@@ -23,10 +23,9 @@ class AspirationCriterion(MemoryCriterion, ABC):
     _aspiration_bound: float
     _aspiration_comparison: Callable[[float, float], bool]
 
-    def __init__(self, solution_id_getter: Callable[[Solution], TMoveId],
-                 solution_aspiration_getter: Callable[[Solution], float],
+    def __init__(self, solution_aspiration_getter: Callable[[Solution], float],
                  bound_type: Optional[AspirationBoundType] = AspirationBoundType.Greater):
-        super().__init__(solution_id_getter)
+        super().__init__()
 
         self._solution_aspiration_getter = solution_aspiration_getter
         self._aspiration_comparison = gt if bound_type is AspirationBoundType.Greater else ge

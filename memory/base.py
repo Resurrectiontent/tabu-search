@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 from copy import copy
 from functools import wraps, reduce
 from operator import itemgetter, attrgetter
-from typing import List, Set, Iterable, Callable, Generic, Tuple
+from typing import List, Set, Iterable, Callable, Tuple
 
-from mutation.base import TMoveId
 from solution.base import Solution
+from solution.id import SolutionId
 
 
-class BaseMemoryCriterion(ABC, Generic[TMoveId]):
+class BaseMemoryCriterion(ABC):
     _inverted: bool
 
     def __init__(self):
@@ -71,10 +71,10 @@ class BaseMemoryCriterion(ABC, Generic[TMoveId]):
         return result
 
 
-class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
+class MemoryCriterion(BaseMemoryCriterion, ABC):
     # TODO: Consider dropping, if not needed + consider moving logics from `_memorize` to `memorize`
     _solution_history: List[Solution]
-    _solution_idx_history: Set[TMoveId]
+    _solution_idx_history: Set[SolutionId]
 
     def __init__(self):
         super().__init__()
@@ -83,7 +83,7 @@ class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
         self._solution_history = []
 
     @abstractmethod
-    def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
+    def _criterion(self, x: Iterable[Solution]) -> Set[SolutionId]:
         """
         Returns a set of ids, which allowed by this criterion type. The set can have intersection with ids of x
         :param x:
@@ -115,7 +115,7 @@ class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
     def _negate_criterion(self):
         def negated_criterion(criterion):
             @wraps(criterion)
-            def wrapper(_self: MemoryCriterion, x: Iterable[Solution]) -> Set[TMoveId]:
+            def wrapper(_self: MemoryCriterion, x: Iterable[Solution]) -> Set[SolutionId]:
                 return {el.id for el in x}.difference(criterion(_self, x))
 
             return wrapper
@@ -126,18 +126,18 @@ class MemoryCriterion(BaseMemoryCriterion[TMoveId], ABC):
             negated_criterion(self._criterion)
         self._inverted = not self._inverted
 
-    def _get_all_and_good_move_idx(self, x: Iterable[Solution]) -> Tuple[Set[TMoveId], List[TMoveId]]:
-        move_idx = attrgetter('id')(x)
+    def _get_all_and_good_move_idx(self, x: Iterable[Solution]) -> Tuple[Set[SolutionId], List[SolutionId]]:
+        move_idx = list(map(attrgetter('id'), x))
         # noinspection PyArgumentList
         good_idx = self._criterion(set(move_idx))
         return good_idx, move_idx
 
 
-class CumulativeMemoryCriterion(BaseMemoryCriterion[TMoveId]):
+class CumulativeMemoryCriterion(BaseMemoryCriterion):
     """
     Used to accumulate multiple memory criteria
     """
-    def __init__(self, operation: Callable[[Set[TMoveId], Set[TMoveId]], Set[TMoveId]], *criteria):
+    def __init__(self, operation: Callable[[set, set], set], *criteria):
         assert len(criteria) > 0
         super().__init__()
 
