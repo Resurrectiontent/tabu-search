@@ -6,10 +6,12 @@ from typing import Iterable, Set, Callable, Optional
 from numpy import NAN
 
 from memory.base import MemoryCriterion
-from mutation.base import TMoveId
 from solution.base import Solution
+from solution.id import SolutionId
 
 
+# TODO: consider introducing SolutionAspiration instead of float
+#   or using BaseSolutionQualityInfo instead
 # TODO: introduce library of solution aspiration getters and a convenient way to pass them to AspirationCriterion ctor
 
 
@@ -31,7 +33,7 @@ class AspirationCriterion(MemoryCriterion, ABC):
         self._aspiration_comparison = gt if bound_type is AspirationBoundType.Greater else ge
         self._aspiration_bound = NAN
 
-    def _criterion(self, x: Iterable[Solution]) -> Set[TMoveId]:
+    def _criterion(self, x: Iterable[Solution]) -> Set[SolutionId]:
         return {s.id for s in x} \
             if self._aspiration_bound is NAN \
             else {s.id

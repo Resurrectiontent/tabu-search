@@ -7,6 +7,8 @@ from typing import List, Set, Iterable, Callable, Tuple
 from solution.base import Solution
 from solution.id import SolutionId
 
+# TODO: introduce mid-term memory
+
 
 class BaseMemoryCriterion(ABC):
     _inverted: bool
