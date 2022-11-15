@@ -1,3 +1,4 @@
+from copy import copy
 from functools import partial
 from typing import Callable, Iterable, Optional
 
@@ -21,8 +22,13 @@ class SolutionFactory:
 
         self._quality_factory = SolutionQualityFactory(*metrics, metrics_aggregation)
 
-    # TODO: implement factory call
+    def __call__(self, position: ndarray, name_suffix=None):
+        return Solution(self._id_factory(name_suffix),
+                        position,
+                        self._quality_factory(position))
 
-    def for_solution_generator(self, generator_name: str):
-        self._id_factory = partial(SolutionId, generator_name)
-        self._initialized = True
+    def for_solution_generator(self, generator_name: str) -> 'SolutionFactory':
+        specialized = copy(self)
+        specialized._id_factory = partial(SolutionId, generator_name)
+        specialized._initialized = True
+        return specialized
