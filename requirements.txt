@@ -1,1 +1,3 @@
 numpy~=1.22.4
+dataclasses~=0.6
+sortedcontainers~=2.4.0
