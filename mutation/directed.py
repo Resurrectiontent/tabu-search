@@ -6,6 +6,7 @@ from typing import Callable, Tuple, List, Iterable, Optional
 from numpy import ndarray
 
 from mutation.base import MutationBehaviour
+from solution.factory import SolutionFactory
 from utils.decorators import return_self_method
 
 
@@ -42,25 +43,10 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
       By default, one of them (which exists) is called in _generate_mutations.
       To change this, override _generate_mutations
     """
-    _generate_one_direction_mutation: Callable[[ndarray, bool], Tuple[str, ndarray]]
-    _generate_one_direction_mutations: Callable[[ndarray, bool], List[Tuple[str, ndarray]]]
+    _generate_one_direction_mutation: Callable[[ndarray, bool], Tuple[ndarray, str]]
+    _generate_one_direction_mutations: Callable[[ndarray, bool], List[Tuple[ndarray, str]]]
 
     _direction: MutationDirection = MutationDirection.Positive
-
-    def __init__(self, quality: Callable[[ndarray], float], mutation_direction: Optional[MutationDirection] = None):
-        """
-        Initializes BidirectionalMutationBehaviour.
-        :param quality: Quality function for evaluating proposed solutions.
-        :param mutation_direction: Direction of mutation. MutationDirection.Positive by default
-        """
-        super().__init__(quality)
-        if mutation_direction:
-            self._direction = mutation_direction
-
-        def self_decorate(name):
-            setattr(self, name, return_self_method(getattr(self, name)))
-
-        map(self_decorate, ['to_negative_direction', 'to_positive_direction', 'to_bidirectional', 'reverse_direction'])
 
     @property
     def direction(self):
@@ -75,7 +61,23 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
     to_bidirectional = partialmethod(direction.fset, MutationDirection.Bidirectional)
     reverse_direction = partialmethod(_direction.reverse)
 
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
+    def __init__(self, general_solution_factory: SolutionFactory, mutation_direction: Optional[MutationDirection] = None):
+        """
+        Initializes BidirectionalMutationBehaviour.
+        :param general_solution_factory: General solution factory
+        :param mutation_direction: Direction of mutation. MutationDirection.Positive by default
+        """
+        super().__init__(general_solution_factory)
+        if mutation_direction:
+            self._direction = mutation_direction
+
+        def self_decorate(name):
+            setattr(self, name, return_self_method(getattr(self, name)))
+
+        list(map(self_decorate,
+                 ['to_negative_direction', 'to_positive_direction', 'to_bidirectional', 'reverse_direction']))
+
+    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
         """
         Default implementation for bidirectional mutations. Override, if you need to change it.
         """

@@ -9,13 +9,14 @@ from mutation.directed import BidirectionalMutationBehaviour
 #  (as these classes implement only one function). Think twice on Swap3Mutation
 
 
+
 class Swap2Mutation(MutationBehaviour):
     """
     Implements mutation behaviour, in which all pairs of (non-equal) elements are permuted in different solutions.
     """
     _mutation_type = 'Swap2'
 
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
+    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
         r = []
         for i in range(len(x) - 1):
             for j in range(i + 1, len(x)):
@@ -24,8 +25,9 @@ class Swap2Mutation(MutationBehaviour):
 
                 _x = x.copy()
                 _x[[i, j]] = _x[[j, i]]
-                r.append((self._one_solution_suffix(i, j), _x))
+                r.append((_x, str(i), str(j)))
 
+        # noinspection PyTypeChecker
         return r
 
 
@@ -38,7 +40,7 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
     _mutation_type = 'Swap3Single'
 
     # Override default logics to reduce cycle initializations
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[str, ndarray]]:
+    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
         r = []
         for i in range(len(x) - 2):
             for j in range(i + 1, len(x) - 1):
@@ -55,12 +57,13 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
         if self.direction.is_positive:
             container.append(self._generate_one_permute(x, idx, values, False))
 
-    def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[str, ndarray]:
+    def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[ndarray, str]:
         values = self._rotate(values, negative)
         x = x.copy()
         x[idx] = values
-        n = self._one_solution_suffix('l' if negative else 'r', *idx)
-        return n, x
+        n = 'l' if negative else 'r'
+        # noinspection PyTypeChecker
+        return x, n, *list(map(str, idx))
 
     @staticmethod
     def _rotate(lst: list, direction_left: bool):

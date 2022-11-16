@@ -1,40 +1,26 @@
-from functools import wraps
 from typing import Callable, Iterable, Tuple
 
 from numpy import ndarray
 
 from mutation.base import MutationBehaviour
-from solution.base import Solution
+from solution.factory import SolutionFactory
 
 
 class CustomMutation(MutationBehaviour):
     """
     Usage:
     ```
-    custom_mutation = CustomMutation(quality_func)(mutation_func, mutation_type_name)
+    custom_mutation = CustomMutation(quality_func, mutation_func, mutation_type_name)
     mutants = custom_mutation.mutate(pivot_solution)
     ```
     """
-    _mutation_type = None
     _generate_mutations = None
+    _mutation_type = None
 
-    def __init__(self, quality: Callable[[ndarray], float]):
-        super().__init__(quality)
+    def __init__(self, general_solution_factory: SolutionFactory,
+                 mutation: Callable[[ndarray], Iterable[Tuple[ndarray, str]]],
+                 mutation_type: str):
+        super().__init__(general_solution_factory)
 
-        # decorate mutation
-        self.mutate = self.check_mutation_inited(self.mutate)
-
-    @staticmethod
-    def check_mutation_inited(mutation):
-        @wraps(mutation)
-        def check_mutate(self, pivot: Solution):
-            assert self._generate_mutations, 'Should initialize mutation function and mutation type name ' \
-                                  'by calling class instance with custom mutation. ' \
-                                  'E.g., mut = CustomMutation(quality)(mutation, mutation_type)'
-            return mutation(self, pivot)
-
-        return check_mutate
-
-    def __call__(self, mutation: Callable[[ndarray], Iterable[Tuple[str, ndarray]]], mutation_type: str):
-        self._generate_mutations_ = mutation
-        self.mutation_type = mutation_type
+        self._generate_mutations = mutation
+        self._mutation_type = mutation_type
