@@ -36,5 +36,5 @@ class AspirationCriterion(MemoryCriterion, ABC):
                   if self._aspiration_comparison(s.quality, self._aspiration_bound)}
 
     def memorize(self, move: Solution):
-        if self._aspiration_comparison(move.quality, self._aspiration_bound):
+        if self._aspiration_bound is NAN or self._aspiration_comparison(move.quality, self._aspiration_bound):
             self._aspiration_bound = move.quality
