@@ -74,16 +74,6 @@ class BaseMemoryCriterion(ABC):
 
 
 class MemoryCriterion(BaseMemoryCriterion, ABC):
-    # TODO: Consider dropping, if not needed + consider moving logics from `_memorize` to `memorize`
-    _solution_history: List[Solution]
-    _solution_idx_history: Set[SolutionId]
-
-    def __init__(self):
-        super().__init__()
-
-        self._solution_idx_history = set()
-        self._solution_history = []
-
     @abstractmethod
     def _criterion(self, x: Iterable[Solution]) -> Set[SolutionId]:
         """
@@ -94,17 +84,12 @@ class MemoryCriterion(BaseMemoryCriterion, ABC):
         ...
 
     @abstractmethod
-    def _memorize(self, move: Solution):
+    def memorize(self, move: Solution):
         """
-        Implementation-specific part of move memorization.
+        Move memorization
         :param move: The selected solution.
         """
         ...
-
-    def memorize(self, move: Solution):
-        self._solution_history.append(move)
-        self._solution_idx_history.update([move.id])
-        self._memorize(move)
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
         good_idx, move_idx = self._get_all_and_good_move_idx(x)

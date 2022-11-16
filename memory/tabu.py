@@ -23,7 +23,7 @@ class TabuList(MemoryCriterion):
     def _criterion(self, x: Iterable[Solution]) -> Set[SolutionId]:
         return {id_ for id_ in [s.id for s in x] if id_ not in self._timers}
 
-    def _memorize(self, move: Solution):
+    def memorize(self, move: Solution):
         for k, v in list(self._timers.items()):
             if v == 1:
                 del self._timers[k]

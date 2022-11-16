@@ -8,10 +8,8 @@ from numpy import NAN
 from memory.base import MemoryCriterion
 from solution.base import Solution
 from solution.id import SolutionId
+from solution.quality.base import BaseSolutionQualityInfo
 
-
-# TODO: consider introducing SolutionAspiration instead of float
-#   or using BaseSolutionQualityInfo instead
 # TODO: introduce library of solution aspiration getters and a convenient way to pass them to AspirationCriterion ctor
 
 
@@ -21,15 +19,12 @@ class AspirationBoundType(Enum):
 
 
 class AspirationCriterion(MemoryCriterion, ABC):
-    _solution_aspiration_getter: Callable[[Solution], float]
-    _aspiration_bound: float
-    _aspiration_comparison: Callable[[float, float], bool]
+    _aspiration_bound: BaseSolutionQualityInfo
+    _aspiration_comparison: Callable[[BaseSolutionQualityInfo, BaseSolutionQualityInfo], bool]
 
-    def __init__(self, solution_aspiration_getter: Callable[[Solution], float],
-                 bound_type: Optional[AspirationBoundType] = AspirationBoundType.Greater):
+    def __init__(self, bound_type: Optional[AspirationBoundType] = None):
         super().__init__()
 
-        self._solution_aspiration_getter = solution_aspiration_getter
         self._aspiration_comparison = gt if bound_type is AspirationBoundType.Greater else ge
         self._aspiration_bound = NAN
 
@@ -38,9 +33,8 @@ class AspirationCriterion(MemoryCriterion, ABC):
             if self._aspiration_bound is NAN \
             else {s.id
                   for s in x
-                  if self._aspiration_comparison(self._solution_aspiration_getter(s), self._aspiration_bound)}
+                  if self._aspiration_comparison(s.quality, self._aspiration_bound)}
 
-    def _memorize(self, move: Solution):
-        move_aspiration = self._solution_aspiration_getter(move)
-        if self._aspiration_comparison(move_aspiration, self._aspiration_bound):
-            self._aspiration_bound = move_aspiration
+    def memorize(self, move: Solution):
+        if self._aspiration_comparison(move.quality, self._aspiration_bound):
+            self._aspiration_bound = move.quality

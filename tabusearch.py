@@ -5,14 +5,10 @@ from typing import Iterable, Callable
 from numpy import ndarray
 
 from convergence.base import ConvergenceCriterion
-from memory.base import MemoryCriterion
+from memory.aspiration import AspirationCriterion
+from memory.tabu import TabuList
 from mutation.base import MutationBehaviour
 from solution.base import Solution
-
-
-# TODO: [1] Introduce SolutionFactory to avoid solution_id_getter's
-
-# TODO: [2] Consider introducing separate class for quality metric value instead of float
 
 
 class TabuSearch(ABC):
@@ -22,8 +18,12 @@ class TabuSearch(ABC):
     convergence_criterion: ConvergenceCriterion
     mutation_behaviour: Iterable[MutationBehaviour]
     quality: Callable[[ndarray], float]
-    _aspiration: MemoryCriterion
-    _tabu: MemoryCriterion
+    _aspiration: AspirationCriterion
+    _tabu: TabuList
+
+    @property
+    def resulting_memory_criterion(self):
+        return self._tabu and self._aspiration
 
     def optimize(self, x0: ndarray):
         # TODO: convert x0 to solution

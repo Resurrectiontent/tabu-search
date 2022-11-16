@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from functools import total_ordering
 
 
+@total_ordering
 class BaseSolutionQualityInfo(ABC):
     """
     Maximized quality metric. I.e., `better_solution_quality_metric > worse_solution_quality_metric`

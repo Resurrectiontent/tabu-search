@@ -9,7 +9,6 @@ from mutation.directed import BidirectionalMutationBehaviour
 #  (as these classes implement only one function). Think twice on Swap3Mutation
 
 
-
 class Swap2Mutation(MutationBehaviour):
     """
     Implements mutation behaviour, in which all pairs of (non-equal) elements are permuted in different solutions.
