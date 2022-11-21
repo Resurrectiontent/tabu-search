@@ -13,7 +13,6 @@ from solution.base import Solution
 from solution.factory import SolutionFactory
 
 # TODO: implement solution selection
-# TODO: consider possibility of using different metrics for solution selection and aspiration
 
 
 class TabuSearch(ABC):

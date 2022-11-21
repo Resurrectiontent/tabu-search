@@ -6,6 +6,7 @@ from numpy import ndarray
 
 from solution.base import Solution
 from solution.id import SolutionId
+from solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
 from solution.quality.base import BaseSolutionQualityInfo
 from solution.quality.factory import SolutionQualityFactory
 
@@ -16,7 +17,7 @@ class SolutionFactory:
     #  consider partial for BaseSolutionQualityInfo-inherited ctors
     def __init__(self, *metrics: Callable[[ndarray], BaseSolutionQualityInfo],
                  metrics_aggregation: Optional[Callable[[Iterable[BaseSolutionQualityInfo]],
-                                                        BaseSolutionQualityInfo]] = None):
+                                                        BaseAggregatedSolutionQualityInfo]] = None):
         self._id_factory = None
 
         self._quality_factory = SolutionQualityFactory(*metrics, metrics_aggregation)

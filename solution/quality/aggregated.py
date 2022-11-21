@@ -1,3 +1,4 @@
+from abc import ABC
 from functools import partialmethod
 from operator import eq, lt
 from typing import Callable, Iterable
@@ -11,10 +12,19 @@ from solution.quality.single import SolutionQualityInfo
 # TODO: consider introducing convenient shortcuts for popular aggregations and comparisons
 
 
-class AggregateComparisonSolutionQualityInfo(BaseSolutionQualityInfo):
+class BaseAggregatedSolutionQualityInfo(BaseSolutionQualityInfo, ABC):
+    """
+    Base class for SolutionQualityInfo aggregation.
+    Implements no abstract logic. Created for marking SolutionQualityInfo aggregating classes via inheritance.
+    Inherited classes should also
+    """
+    pass
+
+
+class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
     def __init__(self, name: str, *metrics, aggregation: [Callable[[Iterable[bool]], bool]]):
         value_str = '\n'.join(list(map(str, metrics)))
-        super().__init__(name, value_str)
+        super(BaseAggregatedSolutionQualityInfo, self).__init__(name, value_str)
 
         self._data = list(metrics)
         self._aggregation = aggregation
@@ -30,7 +40,7 @@ class AggregateComparisonSolutionQualityInfo(BaseSolutionQualityInfo):
     _less_than = partialmethod(_cmp_agg, cmp=lt)
 
 
-class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo):
+class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo, BaseAggregatedSolutionQualityInfo):
     def __init__(self, name: str, *metrics, aggregation: Callable[[Iterable[float]], float]):
         # may remain unused
         def value_str(metr):
