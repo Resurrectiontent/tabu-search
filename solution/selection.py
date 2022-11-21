@@ -19,7 +19,7 @@ class SolutionSelection:
         """
         self._idx_selector = idx_selector if idx_selector is not None else lambda: 0
 
-    def select_n_solutions(self, solutions: SortedList[Solution]) -> Iterable[Solution]:
+    def __call__(self, solutions: SortedList[Solution]) -> Iterable[Solution]:
         """
         Selects the "best" solution from ordered `solutions`. "Best" means defined by solution selection strategy.
         :param solutions: `SortedList` of `Solution` objects ordered by ascending quality (best - last).
