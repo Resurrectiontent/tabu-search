@@ -1,6 +1,8 @@
 from abc import ABC
 from itertools import chain
+from operator import attrgetter
 from typing import Iterable
+
 from numpy import ndarray
 from sortedcontainers import SortedList
 
@@ -11,18 +13,22 @@ from memory.tabu import TabuList
 from mutation.base import MutationBehaviour
 from solution.base import Solution
 from solution.factory import SolutionFactory
-
-# TODO: implement solution selection
+from solution.selection import SolutionSelection
 
 
 class TabuSearch(ABC):
-    hall_of_fame: SortedList  # sorted by ascending quality
+    hall_of_fame_size: int
+
+    hall_of_fame: SortedList[Solution]  # sorted by ascending quality
     convergence_criterion: ConvergenceCriterion
     mutation_behaviour: Iterable[MutationBehaviour]
     solution_factory: SolutionFactory
     aspiration: AspirationCriterion
     tabu: TabuList
+    solution_selection: SolutionSelection
     _memory: BaseMemoryCriterion
+
+    # TODO: implement constructor
 
     @property
     def resulting_memory_criterion(self):
@@ -47,9 +53,9 @@ class TabuSearch(ABC):
         possible_moves = chain(*[behaviour.mutate(x) for behaviour in self.mutation_behaviour])
         return self.resulting_memory_criterion.filter(possible_moves)
 
-    def choose(self, neighbours) -> Solution:
-        # TODO: sort by quality, probabilistically (statistically) make a choice
-        ...
+    def choose(self, neighbours: Iterable[Solution]) -> Solution:
+        neighbours = SortedList(neighbours, key=attrgetter('quality'))
+        return self.solution_selection(neighbours)
 
     def memorize_move(self, move: Solution):
         self._memory.memorize(move)
