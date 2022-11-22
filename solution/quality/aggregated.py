@@ -9,8 +9,6 @@ from numpy import ndarray
 from solution.quality.base import BaseSolutionQualityInfo
 from solution.quality.single import SolutionQualityInfo
 
-# TODO: consider introducing convenient shortcuts for popular aggregations and comparisons
-
 
 class BaseAggregatedSolutionQualityInfo(BaseSolutionQualityInfo, ABC):
     """
