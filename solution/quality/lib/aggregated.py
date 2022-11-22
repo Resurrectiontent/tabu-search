@@ -2,12 +2,14 @@ from functools import partial
 from numbers import Number
 from typing import Union, Iterable, Callable
 
-import numpy as np
 from numpy import ndarray
 from numpy.typing import NDArray
 
-from solution.quality.aggregated import BaseAggregatedSolutionQualityInfo, CompareAggregatedSolutionQualityInfo
+from solution.quality.aggregated import BaseAggregatedSolutionQualityInfo, CompareAggregatedSolutionQualityInfo, \
+    AggregateComparisonSolutionQualityInfo
 from solution.quality.base import BaseSolutionQualityInfo
+
+# TODO: add docstring
 
 
 def sum_metrics_aggregation(name: str, weights: Union[NDArray[Number], Iterable[Number], None] = None) \
@@ -27,3 +29,21 @@ def sum_metrics_aggregation(name: str, weights: Union[NDArray[Number], Iterable[
             return sum([i * j for i, j in zip(metric_values, list(weights))])
 
     return partial(CompareAggregatedSolutionQualityInfo, name=name, aggregation=aggregation)
+
+
+def per_metric_comparison_aggregation(name: str, aggregation: Union[str, Callable[[Iterable[bool]], bool]] = 'all'):
+    def get_aggregation(s: str):
+        if s == 'all':
+            return all
+        if s == 'any':
+            return any
+        if s == 'most':
+            return lambda l: len([None for x in l if x]) / len(l)
+        raise ValueError(f'Argument aggregation should be "all", "any", "most" or callable. Was "{s}".')
+
+    try:
+        aggregation = get_aggregation(aggregation) if isinstance(aggregation, str) else aggregation
+    except ValueError as ve:
+        raise ve
+
+    return partial(AggregateComparisonSolutionQualityInfo, name=name, aggregation=aggregation)
