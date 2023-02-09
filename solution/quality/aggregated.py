@@ -10,6 +10,8 @@ from solution.quality.base import BaseSolutionQualityInfo
 from solution.quality.single import SolutionQualityInfo
 
 
+# TODO: consider (conditional) making *metrics in ctor args lazy and BaseSolutionQualityInfo
+
 class BaseAggregatedSolutionQualityInfo(BaseSolutionQualityInfo, ABC):
     """
     Base class for SolutionQualityInfo aggregation.
@@ -20,7 +22,7 @@ class BaseAggregatedSolutionQualityInfo(BaseSolutionQualityInfo, ABC):
 
 
 class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
-    def __init__(self, name: str, *metrics, aggregation: [Callable[[Iterable[bool]], bool]]):
+    def __init__(self, *metrics, name: str, aggregation: [Callable[[Iterable[bool]], bool]]):
         value_str = '\n'.join(list(map(str, metrics)))
         super(BaseAggregatedSolutionQualityInfo, self).__init__(name, value_str)
 
@@ -39,10 +41,10 @@ class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
 
 
 class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo, BaseAggregatedSolutionQualityInfo):
-    def __init__(self, name: str, *metrics, aggregation: Callable[[Iterable[float]], float]):
+    def __init__(self, *metrics, name: str, aggregation: Callable[[Iterable[float]], float]):
         # may remain unused
         def value_str(metr):
             return '\n'.join(list(map(str, metr)))
         # most likely will be used
         float_v = aggregation(map(float, metrics))
-        super().__init__(name, metrics, float_v, False, value_str)
+        super().__init__(metrics, name, float_v, False, value_str)

@@ -9,8 +9,8 @@ TData = TypeVar('TData')
 
 
 class SolutionQualityInfo(BaseSolutionQualityInfo):
-    def __init__(self, name: str,
-                 data: TData,
+    def __init__(self, data: TData,
+                 name: str,
                  float_: Union[float, int, Callable[[TData], float]],
                  minimized: Optional[bool] = False,
                  value_str: Optional[Union[str, Callable[[TData], str]]] = str):
