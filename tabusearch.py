@@ -16,6 +16,11 @@ from solution.factory import SolutionFactory
 from solution.selection import SolutionSelection
 
 
+# TODO: consider implementing epsilon-greedy strategy
+# TODO: implement lazy quality calculation with corresponding parameter in factory constructor
+# TODO: implement dimensionality reduction
+
+
 class TabuSearch(ABC):
     hall_of_fame_size: int
 

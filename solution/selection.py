@@ -1,4 +1,4 @@
-from _operator import itemgetter
+from operator import itemgetter
 from typing import Callable
 
 from sortedcontainers import SortedList
