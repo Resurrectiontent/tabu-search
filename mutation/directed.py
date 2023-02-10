@@ -27,7 +27,7 @@ class MutationDirection(IntEnum):
     def is_single_directional(self):
         return self.value != 2
 
-    def reverse(self):
+    def reversed(self):
         if self.value == 1:
             return MutationDirection.Positive
         if self.value == 3:
@@ -59,9 +59,11 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
     to_negative_direction = partialmethod(direction.fset, MutationDirection.Negative)
     to_positive_direction = partialmethod(direction.fset, MutationDirection.Positive)
     to_bidirectional = partialmethod(direction.fset, MutationDirection.Bidirectional)
-    reverse_direction = partialmethod(_direction.reverse)
+    # FIXME: doesn't reverse direction, just returns reversed
+    reverse_direction = partialmethod(_direction.reversed)
 
-    def __init__(self, general_solution_factory: SolutionFactory, mutation_direction: Optional[MutationDirection] = None):
+    def __init__(self, general_solution_factory: SolutionFactory,
+                 mutation_direction: Optional[MutationDirection] = None):
         """
         Initializes BidirectionalMutationBehaviour.
         :param general_solution_factory: General solution factory
@@ -81,7 +83,8 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
         """
         Default implementation for bidirectional mutations. Override, if you need to change it.
         """
-        assert self._generate_one_direction_mutation or self._generate_one_direction_mutations, \
+        assert hasattr(self, '_generate_one_direction_mutation') and self._generate_one_direction_mutation \
+               or hasattr(self, '_generate_one_direction_mutations') and self._generate_one_direction_mutations, \
             'Should implement either _generate_one_direction_mutation or _generate_one_direction_mutations methods' \
             ' to use default logics or override _generate_mutations to implement custom logics.'
         r = []

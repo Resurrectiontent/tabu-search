@@ -56,7 +56,7 @@ class TabuSearch(ABC):
 
     @property
     def resulting_memory_criterion(self):
-        if self._memory is None:
+        if not hasattr(self, '_memory') or self._memory is None:
             self._memory = self.tabu and self.aspiration
         return self._memory
 

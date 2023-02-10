@@ -23,4 +23,5 @@ class SolutionQualityFactory:
                 return metrics_aggregation([m(x) for m in metrics])
             self._factory = factory
 
-    __call__ = _factory
+    def __call__(self, x: NDArray) -> BaseSolutionQualityInfo:
+        return self._factory(x)

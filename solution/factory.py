@@ -20,7 +20,8 @@ class SolutionFactory:
                                                         BaseAggregatedSolutionQualityInfo]] = None):
         self._id_factory = None
 
-        self._quality_factory = SolutionQualityFactory(*metrics, metrics_aggregation)
+        self._quality_factory = SolutionQualityFactory(*metrics,
+                                                       metrics_aggregation=metrics_aggregation)
 
     @property
     def is_initialized(self):

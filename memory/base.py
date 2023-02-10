@@ -116,7 +116,7 @@ class MemoryCriterion(BaseMemoryCriterion, ABC):
     def _get_all_and_good_move_idx(self, x: Iterable[Solution]) -> Tuple[Set[SolutionId], List[SolutionId]]:
         move_idx = list(map(attrgetter('id'), x))
         # noinspection PyArgumentList
-        good_idx = self._criterion(set(move_idx))
+        good_idx = self._criterion(x)
         return good_idx, move_idx
 
 
