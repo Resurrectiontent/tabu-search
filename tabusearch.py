@@ -57,7 +57,7 @@ class TabuSearch(ABC):
     @property
     def resulting_memory_criterion(self):
         if not hasattr(self, '_memory') or self._memory is None:
-            self._memory = self.tabu and self.aspiration
+            self._memory = self.tabu.unite(self.aspiration)
         return self._memory
 
     def optimize(self, x0: ndarray):

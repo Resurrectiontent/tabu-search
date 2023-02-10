@@ -18,6 +18,7 @@ class TabuList(MemoryCriterion):
 
     def __init__(self, tabu_time_getter: Callable[[Solution], int] | int):
         super().__init__()
+        self._timers = {}
         self._tabu_time_getter = tabu_time_getter if callable(tabu_time_getter) else (lambda _: tabu_time_getter)
 
     def _criterion(self, x: Iterable[Solution]) -> Set[SolutionId]:

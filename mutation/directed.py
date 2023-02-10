@@ -59,8 +59,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
     to_negative_direction = partialmethod(direction.fset, MutationDirection.Negative)
     to_positive_direction = partialmethod(direction.fset, MutationDirection.Positive)
     to_bidirectional = partialmethod(direction.fset, MutationDirection.Bidirectional)
-    # FIXME: doesn't reverse direction, just returns reversed
-    reverse_direction = partialmethod(_direction.reversed)
+    def reverse_direction(self): self._direction = self._direction.reversed()
 
     def __init__(self, general_solution_factory: SolutionFactory,
                  mutation_direction: Optional[MutationDirection] = None):

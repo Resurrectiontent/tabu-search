@@ -47,7 +47,7 @@ class BaseMemoryCriterion(ABC):
         """
         ...
 
-    def __and__(self, other: 'BaseMemoryCriterion') -> 'BaseMemoryCriterion':
+    def unite(self, other: 'BaseMemoryCriterion') -> 'BaseMemoryCriterion':
         """
         Represents union of criteria.
         :param other: other criterion
@@ -55,7 +55,7 @@ class BaseMemoryCriterion(ABC):
         """
         return CumulativeMemoryCriterion(set.union, self, other)
 
-    def __or__(self, other: 'BaseMemoryCriterion') -> 'BaseMemoryCriterion':
+    def intersect(self, other: 'BaseMemoryCriterion') -> 'BaseMemoryCriterion':
         """
         Represents intersection of criteria.
         :param other: other criterion
@@ -63,7 +63,7 @@ class BaseMemoryCriterion(ABC):
         """
         return CumulativeMemoryCriterion(set.intersection, self, other)
 
-    def __invert__(self) -> 'BaseMemoryCriterion':
+    def inverted(self) -> 'BaseMemoryCriterion':
         """
         Represents criterion negation.
         :return: Copy of the criterion with inverted filtering.
@@ -132,6 +132,7 @@ class CumulativeMemoryCriterion(BaseMemoryCriterion):
         self._criteria: List[BaseMemoryCriterion] = list(criteria)
 
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
+        x = x if isinstance(x, list) else list(x)
         good_list_idx = self._filter_list_idx(x)
         return itemgetter(*good_list_idx)(x)
 

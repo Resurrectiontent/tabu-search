@@ -19,7 +19,7 @@ class NearestNeighboursMutation(BidirectionalMutationBehaviour):
     """
     _mutation_type = 'NN'
 
-    def _generate_one_direction_mutations(self, x: ndarray, negative: bool) -> List[Tuple[ndarray, str]]:
+    def _generate_one_direction_mutations(self, x: ndarray, negative: bool) -> List[Tuple[ndarray, str, str]]:
         inc = partial(add, 1)
         dec = partial(add, -1)
 
@@ -27,9 +27,9 @@ class NearestNeighboursMutation(BidirectionalMutationBehaviour):
 
         r = []
         for i, el in enumerate(x):
-            x = x.copy()
-            x[i] = op(el)
-            r.append((x, mark, str(i)))
+            x_ = x.copy()
+            x_[i] = op(el)
+            r.append((x_, mark, str(i)))
         return r
 
 

@@ -25,7 +25,7 @@ class SolutionQualityInfo(BaseSolutionQualityInfo):
     def _float(self):
         if self._float_n is NAN:
             self._float_n = self._float_f()
-        return self._float_n
+        return float(self._float_n)
 
     def _equals_to(self, other) -> bool:
         return float(self) == float(other)

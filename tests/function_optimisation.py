@@ -21,7 +21,7 @@ def rosenbrock(x: np.ndarray) -> float:
 
 
 def test_rosenbrock_optimisation():
-    x0 = np.array([0.5, 1, 1.25, 0.25, 0.01])
+    x0 = np.array([-1, 0, 1, 2, 3])
     optimiser = TabuSearch(quality=rosenbrock)
     s = optimiser.optimize(x0)
     print(s.__dict__)
