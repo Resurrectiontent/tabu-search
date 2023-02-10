@@ -7,6 +7,7 @@ from typing import List, Set, Iterable, Callable, Tuple
 from solution.base import Solution
 from solution.id import SolutionId
 
+
 # TODO: introduce mid-term memory
 
 
@@ -124,6 +125,7 @@ class CumulativeMemoryCriterion(BaseMemoryCriterion):
     """
     Used to accumulate multiple memory criteria
     """
+
     def __init__(self, operation: Callable[[set, set], set], *criteria):
         assert len(criteria) > 0
         super().__init__()
@@ -134,7 +136,9 @@ class CumulativeMemoryCriterion(BaseMemoryCriterion):
     def filter(self, x: Iterable[Solution]) -> Iterable[Solution]:
         x = x if isinstance(x, list) else list(x)
         good_list_idx = self._filter_list_idx(x)
-        return itemgetter(*good_list_idx)(x)
+        num = len(good_list_idx)
+        return itemgetter(*good_list_idx)(x) if num > 1 else \
+            ((x[good_list_idx.pop()],) if num else [])
 
     def memorize(self, move: Solution):
         for c in self._criteria:

@@ -1,5 +1,7 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
+from solution.base import Solution
 from tabusearch import TabuSearch
 
 
@@ -25,3 +27,7 @@ def test_rosenbrock_optimisation():
     optimiser = TabuSearch(quality=rosenbrock)
     s = optimiser.optimize(x0)
     print(s.__dict__)
+    h: list[Solution] = optimiser._history
+    print('\n'.join(str(list(x.position)) for x in h))
+    plt.plot(np.linspace(0, 1, len(h)), np.array([float(x.quality) for x in h]))
+    plt.show()

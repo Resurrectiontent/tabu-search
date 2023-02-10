@@ -27,4 +27,4 @@ class IterativeConvergence(ConvergenceCriterion):
 
     def converged(self, **kwargs):
         self.iter += 1
-        return self.max_iter > self.iter
+        return self.max_iter <= self.iter

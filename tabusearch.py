@@ -1,4 +1,5 @@
 from abc import ABC
+from copy import copy
 from itertools import chain
 from operator import attrgetter
 from typing import Iterable, Callable
@@ -26,6 +27,9 @@ from solution.selection import SolutionSelection
 # TODO: implement dimensionality reduction
 
 
+# TODO: improve optimization history
+# FIXME: actually maximizes function
+# FIXME: sometimes finds no neighbours
 class TabuSearch(ABC):
     hall_of_fame_size: int
 
@@ -37,6 +41,8 @@ class TabuSearch(ABC):
     tabu: TabuList
     solution_selection: SolutionSelection
     _memory: BaseMemoryCriterion
+
+    _history: list
 
     # TODO: implement constructor
     def __init__(self, hall_of_fame_size: int = 5,
@@ -61,16 +67,23 @@ class TabuSearch(ABC):
         return self._memory
 
     def optimize(self, x0: ndarray):
+        history = []
+
         x = self.solution_factory.initial(x0)
+        history.append(copy(x))
 
         while True:
+
             neighbours = self.get_neighbours(x)
             x = self.choose(neighbours)
             self.memorize_move(x)
 
+            history.append(copy(x))
+
             if self.converged(x):
                 break
 
+        self._history = history
         return x
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
