@@ -53,8 +53,8 @@ class TabuSearch(ABC):
 
         self.hall_of_fame = SortedList(key=attrgetter('quality'))
         self.convergence_criterion = IterativeConvergence(max_iter)
-        self.solution_factory = SolutionFactory(quality and custom_metric('Custom metric', quality)
-                                                        or sum_metric('Sum dimensions'))
+        self.solution_factory = SolutionFactory(quality and custom_metric('Rosenbrock', quality, minimized=True)
+                                                        or sum_metric('Sum dimensions', minimized=True))
         self.mutation_behaviour = [NearestNeighboursMutation(self.solution_factory)]
         self.aspiration = AspirationCriterion()
         self.tabu = TabuList(tabu_time)

@@ -11,3 +11,6 @@ class Solution:
     id: SolutionId
     position: ndarray
     quality: BaseSolutionQualityInfo
+
+    def __repr__(self):
+        return f'{{{self.id}}}:{self.quality}: {self.position}'

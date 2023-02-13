@@ -46,7 +46,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
     _generate_one_direction_mutation: Callable[[ndarray, bool], Tuple[ndarray, str]]
     _generate_one_direction_mutations: Callable[[ndarray, bool], List[Tuple[ndarray, str]]]
 
-    _direction: MutationDirection = MutationDirection.Positive
+    _direction: MutationDirection = MutationDirection.Bidirectional
 
     @property
     def direction(self):

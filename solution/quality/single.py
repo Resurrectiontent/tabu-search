@@ -39,3 +39,6 @@ class SolutionQualityInfo(BaseSolutionQualityInfo):
         Comparable with float representations of solution quality objects of same types.
         """
         return -self._float if self._minimized else self._float
+
+    def __str__(self) -> str:
+        return f'{self.name} ({float(self)})'
