@@ -48,7 +48,8 @@ class TabuSearch(ABC):
     def __init__(self, hall_of_fame_size: int = 5,
                  max_iter: int = 100,
                  tabu_time: int = 5,
-                 quality: Callable[[NDArray[Number]], float] | None = None):
+                 quality: Callable[[NDArray[Number]], float] | None = None,
+                 selection: Callable[[], int] | None = None):
         self.hall_of_fame_size = hall_of_fame_size
 
         self.hall_of_fame = SortedList(key=attrgetter('quality'))
@@ -58,7 +59,7 @@ class TabuSearch(ABC):
         self.mutation_behaviour = [NearestNeighboursMutation(self.solution_factory)]
         self.aspiration = AspirationCriterion()
         self.tabu = TabuList(tabu_time)
-        self.solution_selection = SolutionSelection(lambda _: 0)
+        self.solution_selection = SolutionSelection(selection or (lambda _: 0))
 
     @property
     def resulting_memory_criterion(self):
@@ -67,6 +68,7 @@ class TabuSearch(ABC):
         return self._memory
 
     def optimize(self, x0: ndarray):
+        # TODO: move to memorize_move
         history = []
 
         x = self.solution_factory.initial(x0)
@@ -84,7 +86,7 @@ class TabuSearch(ABC):
                 break
 
         self._history = history
-        return x
+        return self.hall_of_fame[-1]
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
         possible_moves = chain(*[behaviour.mutate(x) for behaviour in self.mutation_behaviour])
