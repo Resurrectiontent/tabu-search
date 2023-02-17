@@ -1,21 +1,22 @@
-from numpy import NAN
+from collections import deque
 
 from convergence.base import ConvergenceCriterion
 from solution.quality.single import SolutionQualityInfo
 
 
-# TODO: introduce WindowedEnhancementConvergence to account several latest enhancements
-#  or just add an optional argument `window` to EnhancementConvergence
-
 class EnhancementConvergence(ConvergenceCriterion):
-    def __init__(self, min_enhancement: float):
+    def __init__(self, min_enhancement: float, window: int = 1):
+        assert isinstance(window, int), f'Window size should be an integer value, was {type(window)}.'
+        assert window > 0, f'Window size should be at least 1, was {window}.'
+
         self.min_enhancement = min_enhancement
-        self.last_quality = NAN
+        self.quality_history = deque(maxlen=window)
 
     def converged(self, new_result: SolutionQualityInfo, **kwargs):
-        last = self.last_quality
-        self.last_quality = float(new_result)
-        return 0 <= self.last_quality - last <= self.min_enhancement
+        new = float(new_result)
+        res = 0 <= new - max(self.quality_history) <= self.min_enhancement if self.quality_history else False
+        self.quality_history.append(new)
+        return res
 
 
 class IterativeConvergence(ConvergenceCriterion):
