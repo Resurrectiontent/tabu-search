@@ -89,7 +89,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
         r = []
 
         recorder, generator = (r.extend, self._generate_one_direction_mutations) \
-            if self._generate_one_direction_mutations \
+            if hasattr(self, '_generate_one_direction_mutations') \
             else (r.append, self._generate_one_direction_mutation)
 
         # Executes both, if bidirectional
