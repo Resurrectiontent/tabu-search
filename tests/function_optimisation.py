@@ -7,6 +7,14 @@ from solution.base import Solution
 from tabusearch import TabuSearch
 from tests.lib.functions import rosenbrock, styblinski_tang, mccormick, michalewicz
 
+DEFAULT_TEST_SIZE = 10
+
+
+def test_optimisation(function):
+    if hasattr(function, 'constrained_values'):
+        if hasattr(function, 'constrained_shape'):
+            size = np.prod(function.shape)
+
 
 def test_rosenbrock_optimisation():
     x0 = norm.rvs(loc=1, scale=3.5, size=50).astype(int)  # np.array([-1, 0, 1, 2, 3])
