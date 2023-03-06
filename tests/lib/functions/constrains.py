@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 
 def bounds(min_bounds: NDArray[Number] | None = None, max_bounds: NDArray[Number] | None = None):
-    if min_bounds and max_bounds:
+    if min_bounds is not None and max_bounds is not None:
         assert all(min_bounds <= max_bounds)
 
     def decorate(func):

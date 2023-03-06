@@ -3,7 +3,7 @@ from numbers import Number
 import numpy as np
 from numpy.typing import NDArray
 
-from constrains import shape, bounds
+from tests.lib.functions.constrains import shape, bounds
 
 
 def styblinski_tang(x: NDArray[Number]):
