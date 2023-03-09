@@ -11,12 +11,15 @@ DEFAULT_TEST_SIZE = 10
 DEFAULT_STD = 5
 
 
-@pytest.mark.parametrize('function', [rosenbrock,
-                                      styblinski_tang,
-                                      mccormick,
-                                      michalewicz,
-                                      zakharov])
-def test_optimisation(function):
+@pytest.fixture(scope='module',
+                params=[rosenbrock,
+                        styblinski_tang,
+                        mccormick,
+                        michalewicz,
+                        zakharov])
+def setup_func_x0(request):
+    function = request.param
+
     shape = function.shape if hasattr(function, 'constrained_shape') else (DEFAULT_TEST_SIZE, )
 
     if hasattr(function, 'constrained_values'):
@@ -30,10 +33,17 @@ def test_optimisation(function):
         x0 = norm.rvs(scale=DEFAULT_STD, size=shape)
 
     x0 = x0.astype(int)
+    return {'function': function,
+            'x0': x0}
+
+
+def test_optimisation(setup_func_x0):
+    function = setup_func_x0['function']
+    x0 = setup_func_x0['x0']
 
     optimiser = TabuSearch(quality=function,
                            max_iter=1000,
-                           tabu_time=np.prod(shape),
+                           tabu_time=np.prod(x0.shape),
                            selection=lambda collection_len: min(expon.rvs(size=1).astype(int)[0], collection_len - 1))
     s = optimiser.optimize(x0)
     h: list[Solution] = optimiser._history
