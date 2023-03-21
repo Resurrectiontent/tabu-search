@@ -9,11 +9,10 @@ from numpy import ndarray
 from numpy.typing import NDArray
 from sortedcontainers import SortedList
 
+from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
-from tabusearch.convergence.single import IterativeConvergence
-from tabusearch.memory.aspiration import AspirationCriterion
+from tabusearch.memory import AspirationCriterion, TabuList
 from tabusearch.memory.base import BaseMemoryCriterion
-from tabusearch.memory.tabu import TabuList
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.mutation.neighbourhood import NearestNeighboursMutation
 from tabusearch.solution.base import Solution
