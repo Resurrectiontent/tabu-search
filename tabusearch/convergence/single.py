@@ -1,7 +1,7 @@
 from collections import deque
 
-from convergence.base import ConvergenceCriterion
-from solution.quality.single import SolutionQualityInfo
+from tabusearch.convergence.base import ConvergenceCriterion
+from tabusearch.solution.quality.single import SolutionQualityInfo
 
 
 class EnhancementConvergence(ConvergenceCriterion):

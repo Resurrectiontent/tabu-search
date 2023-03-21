@@ -2,8 +2,8 @@ from typing import Callable, Iterable, Tuple
 
 from numpy import ndarray
 
-from mutation.base import MutationBehaviour
-from solution.factory import SolutionFactory
+from tabusearch.mutation.base import MutationBehaviour
+from tabusearch.solution.factory import SolutionFactory
 
 
 class CustomMutation(MutationBehaviour):

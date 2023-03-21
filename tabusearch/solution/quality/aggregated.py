@@ -6,8 +6,8 @@ from typing import Callable, Iterable
 import numpy as np
 from numpy import ndarray
 
-from solution.quality.base import BaseSolutionQualityInfo
-from solution.quality.single import SolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.single import SolutionQualityInfo
 
 
 # TODO: consider (conditional) making *metrics in ctor args lazy and BaseSolutionQualityInfo

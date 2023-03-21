@@ -4,11 +4,11 @@ from typing import Callable, Iterable, Optional
 
 from numpy import ndarray
 
-from solution.base import Solution
-from solution.id import SolutionId
-from solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
-from solution.quality.base import BaseSolutionQualityInfo
-from solution.quality.factory import SolutionQualityFactory
+from tabusearch.solution.base import Solution
+from tabusearch.solution.id import SolutionId
+from tabusearch.solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.factory import SolutionQualityFactory
 
 
 class SolutionFactory:

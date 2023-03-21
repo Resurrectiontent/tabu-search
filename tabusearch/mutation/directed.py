@@ -5,9 +5,9 @@ from typing import Callable, Tuple, List, Iterable, Optional
 
 from numpy import ndarray
 
-from mutation.base import MutationBehaviour
-from solution.factory import SolutionFactory
-from utils.decorators import return_self_method
+from tabusearch.mutation.base import MutationBehaviour
+from tabusearch.solution.factory import SolutionFactory
+from tabusearch.utils.decorators import return_self_method
 
 
 class MutationDirection(IntEnum):

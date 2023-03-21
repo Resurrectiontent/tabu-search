@@ -9,17 +9,17 @@ from numpy import ndarray
 from numpy.typing import NDArray
 from sortedcontainers import SortedList
 
-from convergence.base import ConvergenceCriterion
-from convergence.single import IterativeConvergence
-from memory.aspiration import AspirationCriterion
-from memory.base import BaseMemoryCriterion
-from memory.tabu import TabuList
-from mutation.base import MutationBehaviour
-from mutation.neighbourhood import NearestNeighboursMutation
-from solution.base import Solution
-from solution.factory import SolutionFactory
-from solution.quality.lib.single import sum_metric, custom_metric
-from solution.selection import SolutionSelection
+from tabusearch.convergence.base import ConvergenceCriterion
+from tabusearch.convergence.single import IterativeConvergence
+from tabusearch.memory.aspiration import AspirationCriterion
+from tabusearch.memory.base import BaseMemoryCriterion
+from tabusearch.memory.tabu import TabuList
+from tabusearch.mutation.base import MutationBehaviour
+from tabusearch.mutation.neighbourhood import NearestNeighboursMutation
+from tabusearch.solution.base import Solution
+from tabusearch.solution.factory import SolutionFactory
+from tabusearch.solution.quality.lib.single import sum_metric, custom_metric
+from tabusearch.solution.selection import SolutionSelection
 
 
 # TODO: consider implementing epsilon-greedy strategy

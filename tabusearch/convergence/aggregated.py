@@ -1,6 +1,6 @@
 from abc import ABC
 
-from convergence.base import ConvergenceCriterion
+from tabusearch.convergence.base import ConvergenceCriterion
 
 
 class AggregatedConvergence(ConvergenceCriterion, ABC):

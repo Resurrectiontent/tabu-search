@@ -5,11 +5,11 @@ from typing import Iterable, Set, Callable, Optional
 
 from numpy import NAN
 
-from memory.base import MemoryCriterion
-from solution.base import Solution
-from solution.id import SolutionId
-from solution.quality.base import BaseSolutionQualityInfo
-from solution.quality.factory import SolutionQualityFactory
+from tabusearch.memory.base import MemoryCriterion
+from tabusearch.solution.base import Solution
+from tabusearch.solution.id import SolutionId
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.factory import SolutionQualityFactory
 
 
 # TODO: introduce library of solution aspiration getters and a convenient way to pass them to AspirationCriterion ctor

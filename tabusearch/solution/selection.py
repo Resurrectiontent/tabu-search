@@ -3,7 +3,7 @@ from typing import Callable
 
 from sortedcontainers import SortedList
 
-from solution.base import Solution
+from tabusearch.solution.base import Solution
 
 
 class SolutionSelection:

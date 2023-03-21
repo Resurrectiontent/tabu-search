@@ -1,8 +1,8 @@
-from typing import Iterable, Set, List, Callable, Dict
+from typing import Iterable, Set, Callable, Dict
 
-from memory.base import MemoryCriterion
-from solution.base import Solution
-from solution.id import SolutionId
+from tabusearch.memory.base import MemoryCriterion
+from tabusearch.solution.base import Solution
+from tabusearch.solution.id import SolutionId
 
 
 # TODO: introduce library of tabu time getters and a convenient way to pass them to TabuList ctor

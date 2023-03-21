@@ -2,8 +2,8 @@ from typing import Iterable, Tuple
 
 from numpy import ndarray
 
-from mutation.base import MutationBehaviour
-from mutation.directed import BidirectionalMutationBehaviour
+from tabusearch.mutation.base import MutationBehaviour
+from tabusearch.mutation.directed import BidirectionalMutationBehaviour
 
 # TODO: consider moving from classes to functions, passed to superclass ctor
 #  (as these classes implement only one function). Think twice on Swap3Mutation

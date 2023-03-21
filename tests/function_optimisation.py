@@ -3,7 +3,7 @@ import pytest
 from scipy.stats import norm, expon
 from matplotlib import pyplot as plt
 
-from solution.base import Solution
+from tabusearch.solution.base import Solution
 from tabusearch import TabuSearch
 from tests.lib.functions import rosenbrock, styblinski_tang, mccormick, michalewicz, zakharov
 

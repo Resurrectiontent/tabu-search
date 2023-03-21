@@ -2,8 +2,8 @@ from typing import Callable, Iterable, Optional
 
 from numpy.typing import NDArray
 
-from solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
-from solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
 
 
 class SolutionQualityFactory:

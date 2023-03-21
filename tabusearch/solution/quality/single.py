@@ -3,7 +3,7 @@ from typing import Union, Callable, Optional, TypeVar
 
 from numpy import NAN
 
-from solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
 
 TData = TypeVar('TData')
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from numpy import ndarray
 
-from solution.id import SolutionId
-from solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.id import SolutionId
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
 
 
 @dataclass

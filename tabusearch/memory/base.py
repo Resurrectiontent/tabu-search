@@ -4,8 +4,8 @@ from functools import wraps, reduce
 from operator import itemgetter, attrgetter
 from typing import List, Set, Iterable, Callable, Tuple
 
-from solution.base import Solution
-from solution.id import SolutionId
+from tabusearch.solution.base import Solution
+from tabusearch.solution.id import SolutionId
 
 
 # TODO: introduce mid-term memory

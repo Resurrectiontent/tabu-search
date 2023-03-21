@@ -3,8 +3,8 @@ from typing import List, Iterable, Tuple
 
 from numpy import ndarray
 
-from solution.base import Solution
-from solution.factory import SolutionFactory
+from tabusearch.solution.base import Solution
+from tabusearch.solution.factory import SolutionFactory
 
 
 class MutationBehaviour(ABC):
