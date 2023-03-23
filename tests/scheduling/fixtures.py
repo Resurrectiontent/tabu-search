@@ -1,37 +1,42 @@
-from random import Random
+from collections import defaultdict
 
 import numpy as np
-from deap.base import Toolbox
 import pytest
-from sampo import generator
-from sampo.scheduler.heft.base import HEFTScheduler
+from deap.base import Toolbox
 
-from sampo.utilities.resource_cost import schedule_cost
-from sampo.scheduler.genetic.converter import ChromosomeType, convert_schedule_to_chromosome
-from sampo.scheduler.genetic.operators import init_toolbox, TimeFitness
+from sampo import generator
+from sampo.scheduler.genetic.operators import init_toolbox, TimeAndResourcesFitness
+from sampo.scheduler.heft.base import HEFTScheduler
 from sampo.schemas.contractor import Contractor, WorkerContractorPool
 from sampo.schemas.graph import WorkGraph, GraphNode
-from sampo.schemas.schedule import Schedule
 from sampo.schemas.schedule_spec import ScheduleSpec
-from sampo.schemas.time import Time
 from sampo.schemas.time_estimator import WorkTimeEstimator
 from sampo.utilities.collections import reverse_dictionary
 
 
-
+@pytest.fixture(scope='session')
 def setup_wg():
     wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=100, uniq_works=30,
                                                          uniq_resources=10)
     return wg
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def setup_contractors(setup_wg):
     contractors = [generator.get_contractor_by_wg(setup_wg)]
     return contractors
 
 
-@pytest.fixture(scope='module', params=[HEFTScheduler])
+@pytest.fixture(scope='session')
+def setup_worker_pool(setup_contractors) -> WorkerContractorPool:
+    worker_pool = defaultdict(dict)
+    for contractor in setup_contractors:
+        for worker in contractor.workers.values():
+            worker_pool[worker.name][worker.contractor_id] = worker
+    return worker_pool
+
+
+@pytest.fixture(scope='session', params=[HEFTScheduler])
 def setup_schedule(request, setup_wg, setup_contractors):
     scheduler = request.param
 
@@ -39,26 +44,16 @@ def setup_schedule(request, setup_wg, setup_contractors):
     return schedule
 
 
-# TODO: remove data that is unnecessary for tabu searcg
-#   from toolbox initialization
-
-@pytest.fixture(scope='module')
-def setup_toolbox(setup_wg, setup_contractors, setup_worker_pool, setup_schedule) -> Toolbox:
-
+@pytest.fixture(scope='session')
+def setup_toolbox(setup_wg, setup_contractors, setup_worker_pool) -> Toolbox:
     return create_toolbox(setup_wg,
                           setup_contractors,
-                          setup_worker_pool,
-                          0, .0, .0,
-                          {'schedule': setup_schedule})
+                          setup_worker_pool)
+
 
 def create_toolbox(wg: WorkGraph,
                    contractors: list[Contractor],
                    worker_pool: WorkerContractorPool,
-                   selection_size: int,
-                   mutate_order: float,
-                   mutate_resources: float,
-                   init_schedules: dict[str, Schedule],
-                   rand: Random = Random(),
                    spec: ScheduleSpec = ScheduleSpec(),
                    work_estimator: WorkTimeEstimator = None) -> Toolbox:
     nodes = [node for node in wg.nodes if not node.is_inseparable_son()]
@@ -69,7 +64,6 @@ def create_toolbox(wg: WorkGraph,
     index2contractor = {ind: contractor.id for ind, contractor in enumerate(contractors)}
     index2contractor_obj = {ind: contractor for ind, contractor in enumerate(contractors)}
     contractor2index = reverse_dictionary(index2contractor)
-    index2node_list = [(index, node) for index, node in enumerate(nodes)]
     worker_pool_indices = {worker_name2index[worker_name]: {
         contractor2index[contractor_id]: worker for contractor_id, worker in workers_of_type.items()
     } for worker_name, workers_of_type in worker_pool.items()}
@@ -111,31 +105,26 @@ def create_toolbox(wg: WorkGraph,
         for child in node_children:
             parents[child].append(node)
 
-    init_chromosomes: dict[str, ChromosomeType] = \
-        {name: convert_schedule_to_chromosome(wg, work_id2index, worker_name2index,
-                                              contractor2index, contractor_borders, schedule)
-         for name, schedule in init_schedules.items()}
-
-    return init_toolbox(wg,
-                        contractors,
-                        worker_pool,
-                        index2node,
-                        work_id2index,
-                        worker_name2index,
-                        index2contractor,
-                        index2contractor_obj,
-                        init_chromosomes,
-                        mutate_order,
-                        mutate_resources,
-                        selection_size,
-                        rand,
-                        spec,
-                        worker_pool_indices,
-                        contractor2index,
-                        contractor_borders,
-                        node_indices,
-                        index2node_list,
-                        parents,
-                        TimeFitness,
-                        Time(0),
-                        work_estimator)
+    return init_toolbox(wg=wg,
+                        work_id2index=work_id2index,
+                        worker_name2index=worker_name2index,
+                        contractor2index=contractor2index,
+                        contractor_borders=contractor_borders,
+                        fitness_constructor=TimeAndResourcesFitness,
+                        node_indices=node_indices,
+                        parents=parents,
+                        worker_pool=worker_pool,
+                        index2node=index2node,
+                        index2contractor_obj=index2contractor_obj,
+                        worker_pool_indices=worker_pool_indices,
+                        spec=spec,
+                        work_estimator=work_estimator,
+                        # don't fill parameters that won't be used during tabu search
+                        contractors=None,
+                        index2contractor=None,
+                        index2node_list=None,
+                        init_chromosomes=None,
+                        mutate_order=None,
+                        mutate_resources=None,
+                        rand=None,
+                        selection_size=None)
