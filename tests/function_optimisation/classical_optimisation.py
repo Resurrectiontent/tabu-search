@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 from tabusearch import TabuSearch
 from tabusearch.solution.base import Solution
-from tests.lib.functions import rosenbrock, styblinski_tang, mccormick, michalewicz, zakharov
+from tests.function_optimisation.functions import rosenbrock, styblinski_tang, mccormick, michalewicz, zakharov
 
 DEFAULT_TEST_SIZE = 10
 DEFAULT_STD = 5
