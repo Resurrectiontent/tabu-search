@@ -1,14 +1,17 @@
 from collections import defaultdict
+from typing import Callable
 
 import numpy as np
 import pytest
 from deap.base import Toolbox
 
 from sampo import generator
+from sampo.scheduler.base import Scheduler
 from sampo.scheduler.genetic.operators import init_toolbox, TimeAndResourcesFitness
 from sampo.scheduler.heft.base import HEFTScheduler
 from sampo.schemas.contractor import Contractor, WorkerContractorPool
 from sampo.schemas.graph import WorkGraph, GraphNode
+from sampo.schemas.schedule import Schedule
 from sampo.schemas.schedule_spec import ScheduleSpec
 from sampo.schemas.time_estimator import WorkTimeEstimator
 from sampo.utilities.collections import reverse_dictionary
@@ -16,7 +19,8 @@ from sampo.utilities.collections import reverse_dictionary
 
 @pytest.fixture(scope='session')
 def setup_wg():
-    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=100, uniq_works=30,
+    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=100,
+                                                         uniq_works=30,
                                                          uniq_resources=10)
     return wg
 
@@ -37,8 +41,8 @@ def setup_worker_pool(setup_contractors) -> WorkerContractorPool:
 
 
 @pytest.fixture(scope='session', params=[HEFTScheduler])
-def setup_schedule(request, setup_wg, setup_contractors):
-    scheduler = request.param
+def setup_schedule(request, setup_wg, setup_contractors) -> Schedule:
+    scheduler: Callable[[], Scheduler] = request.param
 
     schedule = scheduler().schedule(setup_wg, setup_contractors)
     return schedule
@@ -46,6 +50,13 @@ def setup_schedule(request, setup_wg, setup_contractors):
 
 @pytest.fixture(scope='session')
 def setup_toolbox(setup_wg, setup_contractors, setup_worker_pool) -> Toolbox:
+    """
+    returns a Toolbox that supports following methods:
+      evaluate
+      validate
+      schedule_to_chromosome
+      chromosome_to_schedule
+    """
     return create_toolbox(setup_wg,
                           setup_contractors,
                           setup_worker_pool)
@@ -121,7 +132,7 @@ def create_toolbox(wg: WorkGraph,
                         work_estimator=work_estimator,
                         # don't fill parameters that won't be used during tabu search
                         contractors=None,
-                        index2contractor=None,
+                        index2contractor=[],
                         index2node_list=None,
                         init_chromosomes=None,
                         mutate_order=None,
