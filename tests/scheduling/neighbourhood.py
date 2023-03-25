@@ -25,10 +25,6 @@ def variable_partitioning_resource_neighbourhood(ind: ChromosomeType,
     :param rng: numpy random number generator.
     :return:
     """
-    # sorting is necessary for proper solution indexing
-    def np_sorted(a):
-        a.sort()
-        return a
 
     # check that the required number of mutations doesn't exceed mutation possibilities defined by chromosome size
     partitions_len, variables_len = ind[1].shape
@@ -36,18 +32,22 @@ def variable_partitioning_resource_neighbourhood(ind: ChromosomeType,
     max_level_mutations = max_level_mutations or min(5, variables_len)
     assert partitions_len >= levels
     assert variables_len >= max_level_mutations
+    # TODO: For accurate resource generation, make a map of work resource indices that are eligible for increment
+    #  with respect to worker reqs + same for all contractors
+    # TODO: Same for decrement
 
     result = []
     # generate trial solutions
     # alter l partitions. l = 1,...L
     for partitions_number in range(1, levels + 1):
-        # indices of partitions to alter
-        partitions = np_sorted(rng.choice(partitions_len, partitions_number, replace=False))
         # in each selected partition alter m variables. m = 1,...μ
         for variables_number in range(1, max_level_mutations + 1):
             instance_positive = copy_chromosome(ind)
             instance_negative = copy_chromosome(ind)
 
+            # indices of partitions to alter
+            # sorting is necessary for proper solution indexing
+            partitions = np_sorted(rng.choice(partitions_len, partitions_number, replace=False))
             # for every selected partition select particular variables to alter
             partition_variables = [[[partition] * variables_number,
                                     np_sorted(rng.choice(variables_len, variables_number, replace=False))]
@@ -67,6 +67,76 @@ def variable_partitioning_resource_neighbourhood(ind: ChromosomeType,
                 result.append((instance_negative, '-' + index_str))
 
     return result
+
+
+# TODO: extract repeated code from two functions below
+def generate_increased_resource(init_res: ChromosomeType, partitions: NDArray, variables_number: int,
+                                res_upper_bounds: NDArray, rng: Generator) -> tuple[ChromosomeType, str] | None:
+    """
+    Tries to generate new resource part of chromosome by increasing resources of `init_res` in worker req bounds
+    for resources that are enumerated in `partitions`. Doesn't check that contractor capacity can satisfy new resource.
+    :param init_res: Initial chromosome.
+    :param partitions: Resource indices to alter.
+    :param variables_number: Number of works for which we should alter given resources.
+    :param res_upper_bounds: Upper border of worker reqs.
+    :param rng: Numpy random number generator.
+    :return: None, if can't alter resources under given conditions, otherwise, new chromosome and its altering index.
+    """
+
+    def choice_for_partition(partition):
+        idx = np.where(init_res[1][-1] < init_res[2].shape[0] - 1) \
+            if partition == init_res[1].shape[0] - 1 \
+            else np.where(init_res[1][partition] < res_upper_bounds[partition])
+        if idx.size < variables_number:
+            raise IndexError()
+        return np_sorted(rng.choice(idx, variables_number, replace=False))
+
+    try:
+        partition_variables = [[[partition] * variables_number, choice_for_partition(partition)]
+                               for partition in partitions]
+    except IndexError:
+        return None
+
+    index_str = '+' + ','.join([f'{p[0]}[{",".join(map(str, v))}]' for p, v in partition_variables])
+    indices = tuple(list(chain(*x)) for x in zip(*partition_variables))
+    new_res = copy_chromosome(init_res)
+    new_res[1][indices] = new_res[1][indices] + 1
+
+    return new_res, index_str
+
+
+def generate_decreased_resource(init_res: ChromosomeType, partitions: NDArray, variables_number: int,
+                                res_low_bounds: NDArray, rng: Generator) -> tuple[ChromosomeType, str] | None:
+    """
+    Tries to generate new resource part of chromosome by decreasing resources of `init_res` in worker req bounds
+    for resources that are enumerated in `partitions`. Doesn't check that contractor capacity can satisfy new resource.
+    :param init_res: Initial chromosome.
+    :param partitions: Resource indices to alter.
+    :param variables_number: Number of works for which we should alter given resources.
+    :param res_low_bounds: Lower border of worker reqs.
+    :param rng: Numpy random number generator.
+    :return: None, if can't alter resources under given conditions, otherwise, new chromosome and its altering index.
+    """
+    def choice_for_partition(partition):
+        idx = np.where(init_res[1][-1] > 0) \
+            if partition == init_res[1].shape[0] - 1 \
+            else np.where(init_res[1][partition] > res_low_bounds[partition])
+        if idx.size < variables_number:
+            raise IndexError()
+        return np_sorted(rng.choice(idx, variables_number, replace=False))
+
+    try:
+        partition_variables = [[[partition] * variables_number, choice_for_partition(partition)]
+                               for partition in partitions]
+    except IndexError:
+        return None
+
+    index_str = '-' + ','.join([f'{p[0]}[{",".join(map(str, v))}]' for p, v in partition_variables])
+    indices = tuple(list(chain(*x)) for x in zip(*partition_variables))
+    new_res = copy_chromosome(init_res)
+    new_res[1][indices] = new_res[1][indices] - 1
+
+    return new_res, index_str
 
 
 # TODO: consider making one-stringers from check functions
@@ -125,3 +195,8 @@ def check_increased_resources(res: NDArray, contractor_borders: NDArray, res_up_
         return False
 
     return True
+
+
+def np_sorted(a: NDArray):
+    a.sort()
+    return a
