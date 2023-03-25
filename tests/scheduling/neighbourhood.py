@@ -42,29 +42,22 @@ def variable_partitioning_resource_neighbourhood(ind: ChromosomeType,
     for partitions_number in range(1, levels + 1):
         # in each selected partition alter m variables. m = 1,...μ
         for variables_number in range(1, max_level_mutations + 1):
-            instance_positive = copy_chromosome(ind)
-            instance_negative = copy_chromosome(ind)
-
             # indices of partitions to alter
             # sorting is necessary for proper solution indexing
             partitions = np_sorted(rng.choice(partitions_len, partitions_number, replace=False))
-            # for every selected partition select particular variables to alter
-            partition_variables = [[[partition] * variables_number,
-                                    np_sorted(rng.choice(variables_len, variables_number, replace=False))]
-                                   for partition in partitions]
-
-            index_str = ','.join([f'{p[0]}[{",".join(map(str, v))}]' for p, v in partition_variables])
-            indices = tuple(list(chain(*x)) for x in zip(*partition_variables))
 
             # alter all selected variables
-            instance_positive[1][indices] = instance_positive[1][indices] + 1
-            instance_negative[1][indices] = instance_negative[1][indices] - 1
+            increased_resource = generate_increased_resource(ind, partitions, variables_number, worker_reqs[1], rng)
+            decreased_resource = generate_decreased_resource(ind, partitions, variables_number, worker_reqs[0], rng)
 
             # check validity and save
-            if check_increased_resources(instance_positive[1], instance_positive[2], worker_reqs[1]):
-                result.append((instance_positive, '+' + index_str))
-            if check_decreased_resources(instance_negative[1], worker_reqs[0]):
-                result.append((instance_negative, '-' + index_str))
+            if increased_resource \
+                    and check_increased_resources(increased_resource[0][1], increased_resource[0][2], worker_reqs[1]):
+                result.append(increased_resource)
+            # no need to validate decreased resource, because it was generated worker reqs aware
+            # and it can't exceed contractor capacity
+            if decreased_resource:
+                result.append(decreased_resource)
 
     return result
 
@@ -92,6 +85,7 @@ def generate_increased_resource(init_res: ChromosomeType, partitions: NDArray, v
         return np_sorted(rng.choice(idx, variables_number, replace=False))
 
     try:
+        # for every selected partition select particular variables to alter
         partition_variables = [[[partition] * variables_number, choice_for_partition(partition)]
                                for partition in partitions]
     except IndexError:
@@ -126,6 +120,7 @@ def generate_decreased_resource(init_res: ChromosomeType, partitions: NDArray, v
         return np_sorted(rng.choice(idx, variables_number, replace=False))
 
     try:
+        # for every selected partition select particular variables to alter
         partition_variables = [[[partition] * variables_number, choice_for_partition(partition)]
                                for partition in partitions]
     except IndexError:
@@ -168,9 +163,9 @@ def check_increased_resources(res: NDArray, contractor_borders: NDArray, res_up_
         -> bool:
     """
     Checks that the somehow increased resource part of chromosome satisfy all the constraints:
-      1. all contractors indices are in contractor pools,
-      2. all assigned contractors' resources are in contractors' limits,
-      3. all allocated resources do not exceed upper borders from worker reqs.
+      1. (deactivated) all contractors indices are in contractor pools,
+      2. (deactivated) all allocated resources do not exceed upper borders from worker reqs,
+      3. all assigned contractors' resources are in contractors' limits.
     :param res: resource part of chromosome
     `[[res1_work1, res1_work2,..], [res2_work2, ...], ...[work1_contractor_id, ...]]`
     :param contractor_borders: contractor worker pools part of chromosome
@@ -180,21 +175,17 @@ def check_increased_resources(res: NDArray, contractor_borders: NDArray, res_up_
     :return: True, if all constraints are satisfied, otherwise, False.
     """
     # all contractors indices are in contractor pools
-    if (res[-1] > contractor_borders.shape[0]).any():
-        return False
-
-    # TODO: consider using all(<generator>) instead of the cycle
-    for ct_id, ct_border in enumerate(contractor_borders):
-        ct_works, = np.where(res[-1] == ct_id)
-        # all assigned contractor's resources are in contractor's limits
-        if (res[:-1, ct_works].max(axis=1) > ct_border).any():
-            return False
+    # if (res[-1] > contractor_borders.shape[0]).any():
+    #     return False
 
     # all allocated resources do not exceed upper borders from worker reqs
-    if (res[:-1] > res_up_borders).any():
-        return False
+    # if (res[:-1] > res_up_borders).any():
+    #     return False
+    # return True
 
-    return True
+    # all assigned contractor's resources are in contractor's limits
+    return all((res[:-1, np.where(res[-1] == ct_id)[0]].max(axis=1) <= ct_border).all()
+               for ct_id, ct_border in enumerate(contractor_borders))
 
 
 def np_sorted(a: NDArray):
