@@ -7,7 +7,7 @@ from deap.base import Toolbox
 
 from sampo import generator
 from sampo.scheduler.base import Scheduler
-from sampo.scheduler.genetic.operators import init_toolbox, TimeAndResourcesFitness
+from sampo.scheduler.genetic.operators import init_toolbox, TimeAndResourcesFitness, is_chromosome_order_correct
 from sampo.scheduler.heft.base import HEFTScheduler
 from sampo.schemas.contractor import Contractor, WorkerContractorPool
 from sampo.schemas.graph import WorkGraph, GraphNode
@@ -143,4 +143,5 @@ def create_toolbox(wg: WorkGraph,
                            selection_size=None)
 
     toolbox.register('get_worker_reqs', lambda: resources_border)
+    toolbox.register('is_order_correct', is_chromosome_order_correct, parents=parents)
     return toolbox
