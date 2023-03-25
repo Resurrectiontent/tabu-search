@@ -21,7 +21,7 @@ def variable_partitioning_order_neighbourhood(ind: ChromosomeType,
     for distance in range(2, max_distance + 1):
         trials = rng.choice(size - distance + 1, one_distance_trials, replace=False)
         for trial_start in trials:
-            for offset in range(1, min(distance, max_one_distance_offset) + 1):
+            for offset in range(1, min(distance, max_one_distance_offset)):
                 shifted_right = copy_chromosome(ind)
                 shifted_left = copy_chromosome(ind)
 
