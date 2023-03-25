@@ -77,9 +77,9 @@ def generate_increased_resource(init_res: ChromosomeType, partitions: NDArray, v
     """
 
     def choice_for_partition(partition):
-        idx = np.where(init_res[1][-1] < init_res[2].shape[0] - 1) \
+        idx = np.where(init_res[1][-1] < init_res[2].shape[0] - 1)[0] \
             if partition == init_res[1].shape[0] - 1 \
-            else np.where(init_res[1][partition] < res_upper_bounds[partition])
+            else np.where(init_res[1][partition] < res_upper_bounds[partition])[0]
         if idx.size < variables_number:
             raise IndexError()
         return np_sorted(rng.choice(idx, variables_number, replace=False))
@@ -112,9 +112,9 @@ def generate_decreased_resource(init_res: ChromosomeType, partitions: NDArray, v
     :return: None, if can't alter resources under given conditions, otherwise, new chromosome and its altering index.
     """
     def choice_for_partition(partition):
-        idx = np.where(init_res[1][-1] > 0) \
+        idx = np.where(init_res[1][-1] > 0)[0] \
             if partition == init_res[1].shape[0] - 1 \
-            else np.where(init_res[1][partition] > res_low_bounds[partition])
+            else np.where(init_res[1][partition] > res_low_bounds[partition])[0]
         if idx.size < variables_number:
             raise IndexError()
         return np_sorted(rng.choice(idx, variables_number, replace=False))
