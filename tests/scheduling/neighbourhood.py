@@ -3,6 +3,7 @@ from itertools import chain
 import random
 
 import numpy as np
+from numpy.typing import NDArray
 from numpy.random import Generator, default_rng
 
 from sampo.scheduler.genetic.operators import copy_chromosome
@@ -10,12 +11,12 @@ from sampo.scheduler.genetic.operators import copy_chromosome
 from sampo.scheduler.genetic.converter import ChromosomeType
 
 
-
 def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None = None,
                                         max_level_mutations: int | None = None,
                                         rng: Generator = default_rng()):
     """
     Generates neighbourhood via variable partitioning. DOI:10.1007/s10489-011-0321-0
+    This implementation takes each resource as a separate partition.
     :param ind: Initial chromosome
     :param levels: Max number of partitions to alter. Defaults to 5 or `ind[1].shape[0]`, if it is lower.
     :param max_level_mutations: Max number of variables to change in each altered partitions.
@@ -23,6 +24,7 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
     :param rng: numpy random number generator
     :return:
     """
+
     def np_sorted(a):
         a.sort()
         return a
@@ -58,44 +60,60 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
     # TODO: return whole chromosome
     return result
 
-def check_chromosome():
-    ...
 
-# sampo resource mutation
-# TODO: erase
-def mut_uniform_int(ind: ChromosomeType, low: np.ndarray, up: np.ndarray, type_of_worker: int,
-                    probability_mutate_resources: float, contractor_count: int, rand: random.Random) -> ChromosomeType:
+# TODO: consider making one-stringers from check functions
+def check_decreased_resources(res: NDArray, res_low_borders: NDArray) \
+        -> bool:
     """
-    Mutation function for resources
-    It changes selected numbers of workers in random work in certain interval for this work
-
-    :param contractor_count:
-    :param ind:
-    :param low: lower bound specified by `WorkUnit`
-    :param up: upper bound specified by `WorkUnit`
-    :param type_of_worker:
-    :param probability_mutate_resources:
-    :param rand:
-    :return: mutate individual
+    Checks that the somehow decreased resource part of chromosome satisfy all the constraints:
+      1. no works are assigned to contractor with negative id
+      2. all allocated resource are not less than minimal worker reqs and zero
+    :param res: resource part of chromosome
+    `[[res1_work1, res1_work2,..], [res2_work2, ...], ...[work1_contractor_id, ...]]`
+    :param res_low_borders: lower borders of worker reqs
+    `[[res1_work1_limit, res1_work2_limit, ...], [res2_work1_limit, ...], ...]`
+    :return: True, if all constraints are satisfied, otherwise, False.
     """
-    ind = copy_chromosome(ind)
+    # no works are assigned to contractor with id "-1"
+    if (res[-1] < 0).any():
+        return False
 
-    # select random number from interval from min to max from uniform distribution
-    size = len(ind[1][type_of_worker])
+    # all allocated resource are not less than minimal worker reqs
+    # (implies non-negativity check)
+    if (res[:-1] < res_low_borders).any():
+        return False
 
-    if type_of_worker == len(ind[1]) - 1:
-        # print('Contractor mutation!')
-        for i in range(size):
-            if rand.random() < probability_mutate_resources:
-                ind[1][type_of_worker][i] = rand.randint(0, contractor_count - 1)
-        return ind
+    return True
 
-    # change in this interval in random number from interval
-    for i, xl, xu in zip(range(size), low, up):
-        if rand.random() < probability_mutate_resources:
-            # borders
-            contractor = ind[1][-1][i]
-            border = ind[2][contractor][type_of_worker]
-            ind[1][type_of_worker][i] = rand.randint(xl, min(xu, border))
 
-    return ind
+def check_increased_resources(res: NDArray, contractor_borders: NDArray, res_up_borders: NDArray) \
+        -> bool:
+    """
+    Checks that the somehow increased resource part of chromosome satisfy all the constraints:
+      1. all contractors indices are in contractor pools,
+      2. all assigned contractors' resources are in contractors' limits,
+      3. all allocated resources do not exceed upper borders from worker reqs.
+    :param res: resource part of chromosome
+    `[[res1_work1, res1_work2,..], [res2_work2, ...], ...[work1_contractor_id, ...]]`
+    :param contractor_borders: contractor worker pools part of chromosome
+    `[[contractor1_res1, contractor1_res2, ...], [contractor2_res1, ...], ...]`
+    :param res_up_borders: upper borders of worker reqs
+    `[[res1_work1_limit, res1_work2_limit, ...], [res2_work1_limit, ...], ...]`
+    :return: True, if all constraints are satisfied, otherwise, False.
+    """
+    # all contractors indices are in contractor pools
+    if (res[-1] > contractor_borders.shape[0]).any():
+        return False
+
+    # TODO: consider using all(<generator>) instead of the cycle
+    for ct_id, ct_border in enumerate(contractor_borders):
+        ct_works, = np.where(res[-1] == ct_id)
+        # all assigned contractor's resources are in contractor's limits
+        if (res[:-1, ct_works].max(axis=1) > ct_border).any():
+            return False
+
+    # all allocated resources do not exceed upper borders from worker reqs
+    if (res[:-1] > res_up_borders).any():
+        return False
+
+    return True
