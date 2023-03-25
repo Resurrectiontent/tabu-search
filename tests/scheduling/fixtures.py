@@ -19,9 +19,9 @@ from sampo.utilities.collections import reverse_dictionary
 
 @pytest.fixture(scope='session')
 def setup_wg():
-    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=100,
+    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=150,
                                                          uniq_works=30,
-                                                         uniq_resources=10)
+                                                         uniq_resources=15)
     return wg
 
 
@@ -62,6 +62,8 @@ def setup_toolbox(setup_wg, setup_contractors, setup_worker_pool) -> Toolbox:
                           setup_worker_pool)
 
 
+# TODO: delete unused data structures
+# TODO: don't use sampo init_toolbox function
 def create_toolbox(wg: WorkGraph,
                    contractors: list[Contractor],
                    worker_pool: WorkerContractorPool,
@@ -116,26 +118,29 @@ def create_toolbox(wg: WorkGraph,
         for child in node_children:
             parents[child].append(node)
 
-    return init_toolbox(wg=wg,
-                        work_id2index=work_id2index,
-                        worker_name2index=worker_name2index,
-                        contractor2index=contractor2index,
-                        contractor_borders=contractor_borders,
-                        fitness_constructor=TimeAndResourcesFitness,
-                        node_indices=node_indices,
-                        parents=parents,
-                        worker_pool=worker_pool,
-                        index2node=index2node,
-                        index2contractor_obj=index2contractor_obj,
-                        worker_pool_indices=worker_pool_indices,
-                        spec=spec,
-                        work_estimator=work_estimator,
-                        # don't fill parameters that won't be used during tabu search
-                        contractors=None,
-                        index2contractor=[],
-                        index2node_list=None,
-                        init_chromosomes=None,
-                        mutate_order=None,
-                        mutate_resources=None,
-                        rand=None,
-                        selection_size=None)
+    toolbox = init_toolbox(wg=wg,
+                           work_id2index=work_id2index,
+                           worker_name2index=worker_name2index,
+                           contractor2index=contractor2index,
+                           contractor_borders=contractor_borders,
+                           fitness_constructor=TimeAndResourcesFitness,
+                           node_indices=node_indices,
+                           parents=parents,
+                           worker_pool=worker_pool,
+                           index2node=index2node,
+                           index2contractor_obj=index2contractor_obj,
+                           worker_pool_indices=worker_pool_indices,
+                           spec=spec,
+                           work_estimator=work_estimator,
+                           # don't fill parameters that won't be used during tabu search
+                           contractors=None,
+                           index2contractor=[],
+                           index2node_list=None,
+                           init_chromosomes=None,
+                           mutate_order=None,
+                           mutate_resources=None,
+                           rand=None,
+                           selection_size=None)
+
+    toolbox.register('get_worker_reqs', lambda: resources_border)
+    return toolbox

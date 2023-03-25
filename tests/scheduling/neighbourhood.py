@@ -2,17 +2,22 @@ import numpy as np
 from itertools import chain
 from numpy.random import Generator, default_rng
 from numpy.typing import NDArray
+from sampo.scheduler.genetic.operators import copy_chromosome
 
 from sampo.scheduler.genetic.converter import ChromosomeType
 
 
-def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None = None,
-                                        max_level_mutations: int | None = None,
-                                        rng: Generator = default_rng()):
+def variable_partitioning_resource_neighbourhood(ind: ChromosomeType,
+                                                 worker_reqs: NDArray,
+                                                 levels: int | None = None,
+                                                 max_level_mutations: int | None = None,
+                                                 rng: Generator = default_rng()):
     """
     Generates neighbourhood via variable partitioning. DOI:10.1007/s10489-011-0321-0
     This implementation takes each resource as a separate partition.
     :param ind: Initial chromosome
+    :param worker_reqs: Worker reqs defined by `WorkUnit` in format:
+    `[[[res1_work1_lower, res1_work2_lower, ...], [res2_work1_lower, ...], ...], [[res1_work1_upper, ...], ...]]`
     :param levels: Max number of partitions to alter. Defaults to 5 or `ind[1].shape[0]`, if it is lower.
     Denoted as L in the paper.
     :param max_level_mutations: Max number of variables to change in each altered partitions.
@@ -25,11 +30,8 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
         a.sort()
         return a
 
-    x = ind[1]
-    assert len(x.shape) == 2
-
     # check that the required number of mutations doesn't exceed mutation possibilities defined by chromosome size
-    partitions_len, variables_len = x.shape
+    partitions_len, variables_len = ind[1].shape
     levels = levels or min(5, partitions_len)
     max_level_mutations = max_level_mutations or min(5, variables_len)
     assert partitions_len >= levels
@@ -43,9 +45,8 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
         partitions = np_sorted(rng.choice(partitions_len, partitions_number, replace=False))
         # in each selected partition alter m variables. m = 1,...μ
         for variables_number in range(1, max_level_mutations + 1):
-            # TODO: work with the whole chromosomes
-            instance_positive = x.copy()
-            instance_negative = x.copy()
+            instance_positive = copy_chromosome(ind)
+            instance_negative = copy_chromosome(ind)
 
             # for every selected partition select particular variables to alter
             partition_variables = [[[partition] * variables_number,
@@ -56,13 +57,14 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
             indices = tuple(list(chain(*x)) for x in zip(*partition_variables))
 
             # alter all selected variables
-            instance_positive[indices] = instance_positive[indices] + 1
-            instance_negative[indices] = instance_negative[indices] - 1
+            instance_positive[1][indices] = instance_positive[1][indices] + 1
+            instance_negative[1][indices] = instance_negative[1][indices] - 1
 
             # check validity and save
-            # TODO: check validity
-            result.append((instance_positive, '+' + index_str))
-            result.append((instance_negative, '-' + index_str))
+            if check_increased_resources(instance_positive[1], instance_positive[2], worker_reqs[1]):
+                result.append((instance_positive, '+' + index_str))
+            if check_decreased_resources(instance_negative[1], worker_reqs[0]):
+                result.append((instance_negative, '-' + index_str))
 
     return result
 
