@@ -1,12 +1,7 @@
-from itertools import chain
-
-import random
-
 import numpy as np
-from numpy.typing import NDArray
+from itertools import chain
 from numpy.random import Generator, default_rng
-
-from sampo.scheduler.genetic.operators import copy_chromosome
+from numpy.typing import NDArray
 
 from sampo.scheduler.genetic.converter import ChromosomeType
 
@@ -19,12 +14,13 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
     This implementation takes each resource as a separate partition.
     :param ind: Initial chromosome
     :param levels: Max number of partitions to alter. Defaults to 5 or `ind[1].shape[0]`, if it is lower.
+    Denoted as L in the paper.
     :param max_level_mutations: Max number of variables to change in each altered partitions.
-        Defaults to 5 or `ind[1].shape[1]`, if it is lower.
-    :param rng: numpy random number generator
+    Defaults to 5 or `ind[1].shape[1]`, if it is lower. Denoted as μ in the paper.
+    :param rng: numpy random number generator.
     :return:
     """
-
+    # sorting is necessary for proper solution indexing
     def np_sorted(a):
         a.sort()
         return a
@@ -32,6 +28,7 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
     x = ind[1]
     assert len(x.shape) == 2
 
+    # check that the required number of mutations doesn't exceed mutation possibilities defined by chromosome size
     partitions_len, variables_len = x.shape
     levels = levels or min(5, partitions_len)
     max_level_mutations = max_level_mutations or min(5, variables_len)
@@ -39,25 +36,34 @@ def variable_partitioning_neighbourhood(ind: ChromosomeType, levels: int | None 
     assert variables_len >= max_level_mutations
 
     result = []
+    # generate trial solutions
+    # alter l partitions. l = 1,...L
     for partitions_number in range(1, levels + 1):
+        # indices of partitions to alter
         partitions = np_sorted(rng.choice(partitions_len, partitions_number, replace=False))
+        # in each selected partition alter m variables. m = 1,...μ
         for variables_number in range(1, max_level_mutations + 1):
+            # TODO: work with the whole chromosomes
             instance_positive = x.copy()
             instance_negative = x.copy()
 
+            # for every selected partition select particular variables to alter
             partition_variables = [[[partition] * variables_number,
                                     np_sorted(rng.choice(variables_len, variables_number, replace=False))]
                                    for partition in partitions]
 
             index_str = ','.join([f'{p[0]}[{",".join(map(str, v))}]' for p, v in partition_variables])
             indices = tuple(list(chain(*x)) for x in zip(*partition_variables))
+
+            # alter all selected variables
             instance_positive[indices] = instance_positive[indices] + 1
             instance_negative[indices] = instance_negative[indices] - 1
 
+            # check validity and save
+            # TODO: check validity
             result.append((instance_positive, '+' + index_str))
             result.append((instance_negative, '-' + index_str))
 
-    # TODO: return whole chromosome
     return result
 
 
