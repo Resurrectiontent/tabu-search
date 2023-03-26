@@ -3,6 +3,8 @@ import pytest
 from scipy.stats import norm, expon
 from matplotlib import pyplot as plt
 
+from mutation.neighbourhood import NearestNeighboursMutation, FullAxisShiftMutation
+from solution.quality.lib import custom_metric
 from tabusearch import TabuSearch
 from tabusearch.solution.base import Solution
 from tests.function_optimisation.functions import rosenbrock, styblinski_tang, mccormick, michalewicz, zakharov
@@ -41,7 +43,8 @@ def test_optimisation(setup_func_x0):
     function = setup_func_x0['function']
     x0 = setup_func_x0['x0']
 
-    optimiser = TabuSearch(quality=function,
+    optimiser = TabuSearch(mutation_behaviour=[NearestNeighboursMutation, FullAxisShiftMutation],
+                           metric=custom_metric(function.__name__, function, minimized=True),
                            max_iter=1000,
                            tabu_time=np.prod(x0.shape),
                            selection=lambda collection_len: min(expon.rvs(size=1).astype(int)[0], collection_len - 1))

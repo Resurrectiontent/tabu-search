@@ -2,21 +2,19 @@ from abc import ABC
 from copy import copy
 from itertools import chain
 from operator import attrgetter
+from sortedcontainers import SortedList
 from typing import Iterable, Callable, Generic
 
-from sortedcontainers import SortedList
-
-from tabusearch.solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
-from tabusearch.solution.quality.base import BaseSolutionQualityInfo
-from tabusearch.solution.quality.single import SolutionQualityInfo
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
 from tabusearch.memory import AspirationCriterion, TabuList
 from tabusearch.memory.base import BaseMemoryCriterion
 from tabusearch.mutation.base import MutationBehaviour
-from tabusearch.mutation.neighbourhood import NearestNeighboursMutation
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
+from tabusearch.solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.single import SolutionQualityInfo
 from tabusearch.solution.selection import SolutionSelection
 from tabusearch.typing_ import TData
 
@@ -62,7 +60,7 @@ class TabuSearch(ABC, Generic[TData]):
         self.hall_of_fame = SortedList(key=attrgetter('quality'))
         # TODO: move convergence to arguments
         self.convergence_criterion = IterativeConvergence(max_iter)
-        self.solution_factory = SolutionFactory(*metric if isinstance(metric, Iterable) else metric,
+        self.solution_factory = SolutionFactory((*metric,) if isinstance(metric, Iterable) else metric,
                                                 metrics_aggregation=metric_aggregation)
         mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]
         self.mutation_behaviour = [mutation(self.solution_factory) for mutation in mutation_behaviour]
