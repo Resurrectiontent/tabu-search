@@ -19,9 +19,9 @@ from sampo.utilities.collections import reverse_dictionary
 
 @pytest.fixture(scope='session')
 def setup_wg():
-    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=150,
-                                                         uniq_works=30,
-                                                         uniq_resources=15)
+    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=40,
+                                                         uniq_works=5,
+                                                         uniq_resources=10)
     return wg
 
 
@@ -144,4 +144,6 @@ def create_toolbox(wg: WorkGraph,
 
     toolbox.register('get_worker_reqs', lambda: resources_border)
     toolbox.register('is_order_correct', is_chromosome_order_correct, parents=parents)
+    toolbox.register('evaluate2', lambda chromosome, fitness: float(fitness.evaluate(chromosome).value),
+                     fitness=TimeAndResourcesFitness(toolbox))
     return toolbox
