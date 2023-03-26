@@ -1,6 +1,3 @@
-# TODO: add simple non-aggregated metrics' shortcuts:
-#  sum/weighted sum
-#  ? custom function ?
 from functools import partial
 from numbers import Number
 from typing import Iterable, Callable

@@ -43,10 +43,10 @@ class TabuSearch(ABC):
 
     _history: list
 
-    # TODO: implement constructor
+    # TODO: extend constructor
     def __init__(self, hall_of_fame_size: int = 5,
                  max_iter: int = 100,
-                 tabu_time: int = 5,
+                 tabu_time: Callable[[Solution], int] | int = 5,
                  quality: Callable[[NDArray[Number]], float] | None = None,
                  selection: Callable[[], int] | None = None):
         self.hall_of_fame_size = hall_of_fame_size
