@@ -2,7 +2,7 @@ from functools import partial
 from operator import add
 from typing import Tuple, List
 
-from numpy import ndarray
+from numpy.typing import NDArray
 
 from tabusearch.mutation.directed import BidirectionalMutationBehaviour
 
@@ -10,7 +10,7 @@ from tabusearch.mutation.directed import BidirectionalMutationBehaviour
 #  (as these classes implement only one function)
 
 
-class NearestNeighboursMutation(BidirectionalMutationBehaviour):
+class NearestNeighboursMutation(BidirectionalMutationBehaviour[NDArray]):
     """
     Implements mutation behaviour, in which we add and/or subtract 1 from every element in different solutions
     ```
@@ -19,7 +19,7 @@ class NearestNeighboursMutation(BidirectionalMutationBehaviour):
     """
     _mutation_type = 'NN'
 
-    def _generate_one_direction_mutations(self, x: ndarray, negative: bool) -> List[Tuple[ndarray, str, str]]:
+    def _generate_one_direction_mutations(self, x: NDArray, negative: bool) -> List[Tuple[NDArray, str, str]]:
         inc = partial(add, 1)
         dec = partial(add, -1)
 
@@ -33,7 +33,7 @@ class NearestNeighboursMutation(BidirectionalMutationBehaviour):
         return r
 
 
-class FullAxisShiftMutation(BidirectionalMutationBehaviour):
+class FullAxisShiftMutation(BidirectionalMutationBehaviour[NDArray]):
     """
     Implements mutation behaviour, in which we shift all elements to negative and/or to positive side
     ```
@@ -42,7 +42,7 @@ class FullAxisShiftMutation(BidirectionalMutationBehaviour):
     """
     _mutation_type = 'FullShift'
 
-    def _generate_one_direction_mutation(self, x: ndarray, negative: bool) -> Tuple[ndarray, str]:
+    def _generate_one_direction_mutation(self, x: NDArray, negative: bool) -> Tuple[NDArray, str]:
         inc = partial(add, 1)
         dec = partial(add, -1)
 

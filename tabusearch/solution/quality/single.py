@@ -1,14 +1,13 @@
 from functools import partial
-from typing import Union, Callable, Optional, TypeVar
+from typing import Union, Callable, Optional, Generic
 
 from numpy import NAN
 
 from tabusearch.solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.typing_ import TData
 
-TData = TypeVar('TData')
 
-
-class SolutionQualityInfo(BaseSolutionQualityInfo):
+class SolutionQualityInfo(BaseSolutionQualityInfo, Generic[TData]):
     def __init__(self, data: TData,
                  name: str,
                  float_: Union[float, int, Callable[[TData], float]],

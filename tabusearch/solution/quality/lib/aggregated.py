@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from tabusearch.solution.quality.aggregated import BaseAggregatedSolutionQualityInfo, \
     CompareAggregatedSolutionQualityInfo, \
     AggregateComparisonSolutionQualityInfo
-from solution.quality import BaseSolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
 
 
 # TODO: add docstring

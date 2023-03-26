@@ -4,6 +4,7 @@ from numpy import ndarray
 
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.factory import SolutionFactory
+from tabusearch.typing_ import TData
 
 
 class CustomMutation(MutationBehaviour):
@@ -18,7 +19,7 @@ class CustomMutation(MutationBehaviour):
     _mutation_type = None
 
     def __init__(self, general_solution_factory: SolutionFactory,
-                 mutation: Callable[[ndarray], Iterable[Tuple[ndarray, str]]],
+                 mutation: Callable[[TData], Iterable[Tuple[TData, str]]],
                  mutation_type: str):
         # should set mutation type before superclass initialisation
         self._generate_mutations = mutation

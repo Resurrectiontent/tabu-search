@@ -4,7 +4,7 @@ from operator import eq, lt
 from typing import Callable, Iterable
 
 import numpy as np
-from numpy import ndarray
+from numpy.typing import NDArray
 
 from tabusearch.solution.quality.base import BaseSolutionQualityInfo
 from tabusearch.solution.quality.single import SolutionQualityInfo
@@ -30,7 +30,7 @@ class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
         self._aggregation = aggregation
 
     @property
-    def _float_ndarray(self) -> ndarray:
+    def _float_ndarray(self) -> NDArray[float]:
         return np.array([float(m) for m in self._data])
 
     def _cmp_agg(self, other: 'AggregateComparisonSolutionQualityInfo', cmp):

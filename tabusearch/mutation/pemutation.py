@@ -1,6 +1,6 @@
 from typing import Iterable, Tuple
 
-from numpy import ndarray
+from numpy.typing import NDArray
 
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.mutation.directed import BidirectionalMutationBehaviour
@@ -9,13 +9,13 @@ from tabusearch.mutation.directed import BidirectionalMutationBehaviour
 #  (as these classes implement only one function). Think twice on Swap3Mutation
 
 
-class Swap2Mutation(MutationBehaviour):
+class Swap2Mutation(MutationBehaviour[NDArray]):
     """
     Implements mutation behaviour, in which all pairs of (non-equal) elements are permuted in different solutions.
     """
     _mutation_type = 'Swap2'
 
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
+    def _generate_mutations(self, x: NDArray) -> Iterable[Tuple[NDArray, str]]:
         r = []
         for i in range(len(x) - 1):
             for j in range(i + 1, len(x)):
@@ -30,7 +30,7 @@ class Swap2Mutation(MutationBehaviour):
         return r
 
 
-class Swap3Mutation(BidirectionalMutationBehaviour):
+class Swap3Mutation(BidirectionalMutationBehaviour[NDArray]):
     """
     Implements mutation behaviour, in which all triplets (without equal elements)
     can be permuted in all two possible ways:
@@ -39,7 +39,7 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
     _mutation_type = 'Swap3Single'
 
     # Override default logics to reduce cycle initializations
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
+    def _generate_mutations(self, x: NDArray) -> Iterable[Tuple[NDArray, str]]:
         r = []
         for i in range(len(x) - 2):
             for j in range(i + 1, len(x) - 1):
@@ -56,7 +56,7 @@ class Swap3Mutation(BidirectionalMutationBehaviour):
         if self.direction.is_positive:
             container.append(self._generate_one_permute(x, idx, values, False))
 
-    def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[ndarray, str]:
+    def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[NDArray, str]:
         values = self._rotate(values, negative)
         x = x.copy()
         x[idx] = values

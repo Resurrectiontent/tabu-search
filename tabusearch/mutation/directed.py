@@ -1,13 +1,12 @@
 from abc import ABC
 from enum import IntEnum
 from functools import partialmethod
-from typing import Callable, Tuple, List, Iterable, Optional
-
-from numpy import ndarray
+from typing import Callable, Tuple, List, Iterable, Optional, Generic
 
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.factory import SolutionFactory
 from tabusearch.utils.decorators import return_self_method
+from typing_ import TData
 
 
 class MutationDirection(IntEnum):
@@ -35,7 +34,7 @@ class MutationDirection(IntEnum):
         return self
 
 
-class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
+class BidirectionalMutationBehaviour(MutationBehaviour[TData], ABC, Generic[TData]):
     """
     Usage:
       Override one of methods _generate_one_direction_mutation or _generate_one_direction_mutations
@@ -43,8 +42,8 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
       By default, one of them (which exists) is called in _generate_mutations.
       To change this, override _generate_mutations
     """
-    _generate_one_direction_mutation: Callable[[ndarray, bool], Tuple[ndarray, str]]
-    _generate_one_direction_mutations: Callable[[ndarray, bool], List[Tuple[ndarray, str]]]
+    _generate_one_direction_mutation: Callable[[TData, bool], Tuple[TData, str]]
+    _generate_one_direction_mutations: Callable[[TData, bool], List[Tuple[TData, str]]]
 
     _direction: MutationDirection = MutationDirection.Bidirectional
 
@@ -78,7 +77,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour, ABC):
         list(map(self_decorate,
                  ['to_negative_direction', 'to_positive_direction', 'to_bidirectional', 'reverse_direction']))
 
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
+    def _generate_mutations(self, x: TData) -> Iterable[Tuple[TData, str]]:
         """
         Default implementation for bidirectional mutations. Override, if you need to change it.
         """

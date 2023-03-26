@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import List, Iterable, Tuple
-
-from numpy import ndarray
+from typing import List, Iterable, Tuple, Generic
 
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
+from tabusearch.typing_ import TData
 
 
-class MutationBehaviour(ABC):
+class MutationBehaviour(ABC, Generic[TData]):
     def __init__(self, general_solution_factory: SolutionFactory):
         self._solution_factory = general_solution_factory.for_solution_generator(self._mutation_type)
 
@@ -28,7 +27,7 @@ class MutationBehaviour(ABC):
         ...
 
     @abstractmethod
-    def _generate_mutations(self, x: ndarray) -> Iterable[Tuple[ndarray, str]]:
+    def _generate_mutations(self, x: TData) -> Iterable[Tuple[TData, str]]:
         """
         Returns all possible mutations of 1D array
         :param x: 1D numpy ndarray
