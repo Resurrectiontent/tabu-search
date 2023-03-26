@@ -20,7 +20,8 @@ class CustomMutation(MutationBehaviour):
     def __init__(self, general_solution_factory: SolutionFactory,
                  mutation: Callable[[ndarray], Iterable[Tuple[ndarray, str]]],
                  mutation_type: str):
-        super().__init__(general_solution_factory)
-
+        # should set mutation type before superclass initialisation
         self._generate_mutations = mutation
         self._mutation_type = mutation_type
+
+        super().__init__(general_solution_factory)
