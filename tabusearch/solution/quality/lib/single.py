@@ -6,6 +6,7 @@ import numpy as np
 from numpy import ndarray
 from numpy.typing import NDArray
 
+from tabusearch.typing_ import TData
 from tabusearch.solution.quality.single import SolutionQualityInfo
 
 
@@ -17,6 +18,6 @@ def sum_metric(name: str, weights: NDArray[Number] | Iterable[Number] | None = N
     return partial(SolutionQualityInfo, name=name, float_=float_, **kwargs)
 
 
-def custom_metric(name: str, evaluation: Callable[[NDArray[Number]], float], **kwargs) \
-        -> Callable[[NDArray[Number]], SolutionQualityInfo]:
+def custom_metric(name: str, evaluation: Callable[[TData], float], **kwargs) \
+        -> Callable[[TData], SolutionQualityInfo]:
     return partial(SolutionQualityInfo, name=name, float_=evaluation, **kwargs)

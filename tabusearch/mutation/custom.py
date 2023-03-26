@@ -1,6 +1,6 @@
-from typing import Callable, Iterable, Tuple
+from functools import partial
 
-from numpy import ndarray
+from typing import Callable, Iterable, Tuple
 
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.factory import SolutionFactory
@@ -26,3 +26,8 @@ class CustomMutation(MutationBehaviour):
         self._mutation_type = mutation_type
 
         super().__init__(general_solution_factory)
+
+
+def create_custom_mutation(name: str, mutation: Callable[[TData], list[tuple[TData, str]]]) \
+        -> Callable[[SolutionFactory], CustomMutation]:
+    return partial(CustomMutation, mutation=mutation, mutation_type=name)

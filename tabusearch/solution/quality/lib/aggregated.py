@@ -33,7 +33,8 @@ def sum_metrics_aggregation(name: str, weights: Union[NDArray[Number], Iterable[
     return partial(CompareAggregatedSolutionQualityInfo, name=name, aggregation=aggregation)
 
 
-def per_metric_comparison_aggregation(name: str, aggregation: Union[str, Callable[[Iterable[bool]], bool]] = 'all'):
+def per_metric_comparison_aggregation(name: str, aggregation: Union[str, Callable[[Iterable[bool]], bool]] = 'all') \
+        -> Callable[[Iterable[BaseSolutionQualityInfo]], BaseAggregatedSolutionQualityInfo]:
     def get_aggregation(s: str):
         if s == 'all':
             return all

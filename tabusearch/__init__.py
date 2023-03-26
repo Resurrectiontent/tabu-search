@@ -2,13 +2,13 @@ from abc import ABC
 from copy import copy
 from itertools import chain
 from operator import attrgetter
-from typing import Iterable, Callable
-from numbers import Number
+from typing import Iterable, Callable, Generic
 
-from numpy import ndarray
-from numpy.typing import NDArray
 from sortedcontainers import SortedList
 
+from tabusearch.solution.quality.aggregated import BaseAggregatedSolutionQualityInfo
+from tabusearch.solution.quality.base import BaseSolutionQualityInfo
+from tabusearch.solution.quality.single import SolutionQualityInfo
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
 from tabusearch.memory import AspirationCriterion, TabuList
@@ -17,8 +17,8 @@ from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.mutation.neighbourhood import NearestNeighboursMutation
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
-from tabusearch.solution.quality.lib.single import sum_metric, custom_metric
 from tabusearch.solution.selection import SolutionSelection
+from tabusearch.typing_ import TData
 
 
 # TODO: consider implementing epsilon-greedy strategy
@@ -29,13 +29,13 @@ from tabusearch.solution.selection import SolutionSelection
 # TODO: improve optimization history
 # FIXME: actually maximizes function
 # FIXME: sometimes finds no neighbours
-class TabuSearch(ABC):
+class TabuSearch(ABC, Generic[TData]):
     hall_of_fame_size: int
 
-    hall_of_fame: SortedList[Solution]  # sorted by ascending quality
+    hall_of_fame: SortedList[Solution[TData]]  # sorted by ascending quality
     convergence_criterion: ConvergenceCriterion
-    solution_factory: SolutionFactory
-    mutation_behaviour: Iterable[MutationBehaviour]
+    solution_factory: SolutionFactory[TData]
+    mutation_behaviour: Iterable[MutationBehaviour[TData]]
     aspiration: AspirationCriterion
     tabu: TabuList
     solution_selection: SolutionSelection
@@ -43,19 +43,29 @@ class TabuSearch(ABC):
 
     _history: list
 
-    # TODO: extend constructor
-    def __init__(self, hall_of_fame_size: int = 5,
+    # TODO: consider further ctor conveniences
+    def __init__(self, mutation_behaviour: Callable[[SolutionFactory], MutationBehaviour]
+                                           | Iterable[Callable[[SolutionFactory], MutationBehaviour]],
+                 metric: Callable[[TData], SolutionQualityInfo]
+                         | Iterable[Callable[[TData], SolutionQualityInfo]],
+                 hall_of_fame_size: int = 5,
                  max_iter: int = 100,
-                 tabu_time: Callable[[Solution], int] | int = 5,
-                 quality: Callable[[NDArray[Number]], float] | None = None,
-                 selection: Callable[[], int] | None = None):
+                 tabu_time: Callable[[Solution[TData]], int] | int = 5,
+                 selection: Callable[[], int] | None = None,
+                 metric_aggregation: Callable[[Iterable[BaseSolutionQualityInfo]], BaseAggregatedSolutionQualityInfo]
+                                     | None = None):
+        assert not isinstance(metric, Iterable) or metric_aggregation, \
+            'Should provide metrics_aggregation, if passing several items in metric arg.'
+
         self.hall_of_fame_size = hall_of_fame_size
 
         self.hall_of_fame = SortedList(key=attrgetter('quality'))
+        # TODO: move convergence to arguments
         self.convergence_criterion = IterativeConvergence(max_iter)
-        self.solution_factory = SolutionFactory(quality and custom_metric('Rosenbrock', quality, minimized=True)
-                                                        or sum_metric('Sum dimensions', minimized=True))
-        self.mutation_behaviour = [NearestNeighboursMutation(self.solution_factory)]
+        self.solution_factory = SolutionFactory(*metric if isinstance(metric, Iterable) else metric,
+                                                metrics_aggregation=metric_aggregation)
+        mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]
+        self.mutation_behaviour = [mutation(self.solution_factory) for mutation in mutation_behaviour]
         self.aspiration = AspirationCriterion()
         self.tabu = TabuList(tabu_time)
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))
@@ -66,7 +76,7 @@ class TabuSearch(ABC):
             self._memory = self.tabu.unite(self.aspiration)
         return self._memory
 
-    def optimize(self, x0: ndarray):
+    def optimize(self, x0: TData):
         # TODO: move to memorize_move
         history = []
 
