@@ -10,11 +10,12 @@ from scheduling.order_neighbourhood import variable_partitioning_order_neighbour
 from scheduling.resource_neighbourhood import variable_partitioning_resource_neighbourhood
 from tabusearch import TabuSearch
 from tabusearch.solution.base import Solution
-from tests.scheduling.fixtures import setup_schedule, setup_toolbox, setup_wg, setup_contractors, setup_worker_pool
+from tests.scheduling.fixtures import setup_schedule_heft, setup_toolbox, setup_contractors, setup_worker_pool
+from scheduling.fixtures import setup_wg
 
 
-def test_resource_neighbourhood(setup_schedule, setup_toolbox):
-    init_schedule = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule)
+def test_resource_neighbourhood(setup_schedule_heft, setup_toolbox):
+    init_schedule = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule_heft)
 
     t1 = time()
     neighbourhood = variable_partitioning_resource_neighbourhood(init_schedule, setup_toolbox.get_worker_reqs())#, 15, 30)
@@ -26,8 +27,8 @@ def test_resource_neighbourhood(setup_schedule, setup_toolbox):
     assert all(map(setup_toolbox.validate, map(itemgetter(0), neighbourhood)))
 
 
-def test_order_neighbourhood(setup_schedule, setup_toolbox):
-    init_schedule = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule)
+def test_order_neighbourhood(setup_schedule_heft, setup_toolbox):
+    init_schedule = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule_heft)
 
     t1 = time()
     neighbourhood = variable_partitioning_order_neighbourhood(init_schedule, setup_toolbox.is_order_correct)

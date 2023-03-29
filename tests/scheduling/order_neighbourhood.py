@@ -1,3 +1,4 @@
+import numpy as np
 from numpy.random import default_rng, Generator
 from typing import Callable
 
@@ -32,8 +33,52 @@ def variable_partitioning_order_neighbourhood(ind: ChromosomeType,
 
                 if is_order_correct(shifted_right):
                     result.append((shifted_right, f'+{trial_start}:{distance},{offset}'))
-                if is_order_correct(shifted_left):
+                if not (shifted_left[0] == shifted_right[0]).all() and is_order_correct(shifted_left):
                     result.append((shifted_left, f'-{trial_start}:{distance},{offset}'))
+
+    return result
+
+
+def variable_partitioning_order_shuffle(ind: ChromosomeType,
+                                        is_order_correct: Callable[[ChromosomeType], bool],
+                                        max_distance: int = 10,
+                                        one_distance_trials: int = 4,
+                                        rng: Generator = default_rng()):
+    size = ind[0].size
+    assert max_distance >= 2
+    assert size >= max_distance + one_distance_trials
+
+    result = []
+
+    def np_shuffled(a):
+        rng.shuffle(a)
+        return a
+
+    for distance in range(2, max_distance + 1):
+        trials = rng.choice(size - distance + 1, one_distance_trials, replace=False)
+        for trial_start in trials:
+            shuffled = copy_chromosome(ind)
+
+            shuffled[0][trial_start:trial_start + distance] \
+                = shuffled[0][np_shuffled(np.arange(trial_start, trial_start + distance))]
+
+            if is_order_correct(shuffled):
+                result.append((shuffled, f'{trial_start}:{distance}'))
+
+    return result
+
+
+def order_shuffle(ind: ChromosomeType,
+                  is_order_correct: Callable[[ChromosomeType], bool],
+                  attempts: int = 15,
+                  rng: Generator = default_rng()):
+    result = []
+
+    for i in range(attempts):
+        shuffled = copy_chromosome(ind)
+        rng.shuffle(shuffled[0])
+        if is_order_correct(shuffled):
+            result.append((shuffled, ''))
 
     return result
 
