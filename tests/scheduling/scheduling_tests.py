@@ -17,8 +17,7 @@ from tabusearch.mutation import create_custom_mutation
 from tabusearch import TabuSearch
 from tabusearch.solution.base import Solution
 from tests.scheduling.fixtures import setup_schedule_heft, setup_schedule_genetic, setup_schedule, \
-    setup_toolbox, setup_contractors, setup_worker_pool
-from scheduling.fixtures import setup_wg
+    setup_toolbox, setup_wg, setup_contractors, setup_worker_pool
 
 
 def test_order_optimisation(setup_schedule, setup_toolbox):

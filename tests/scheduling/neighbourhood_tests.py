@@ -10,8 +10,7 @@ from scheduling.order_neighbourhood import variable_partitioning_order_neighbour
 from scheduling.resource_neighbourhood import variable_partitioning_resource_neighbourhood
 from tabusearch import TabuSearch
 from tabusearch.solution.base import Solution
-from tests.scheduling.fixtures import setup_schedule_heft, setup_toolbox, setup_contractors, setup_worker_pool
-from scheduling.fixtures import setup_wg
+from tests.scheduling.fixtures import setup_schedule_heft, setup_toolbox, setup_wg, setup_contractors, setup_worker_pool
 
 
 def test_resource_neighbourhood(setup_schedule_heft, setup_toolbox):

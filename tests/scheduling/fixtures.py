@@ -7,7 +7,9 @@ from deap.base import Toolbox
 
 from sampo import generator
 from sampo.scheduler.base import Scheduler
-from sampo.scheduler.genetic.operators import init_toolbox, TimeAndResourcesFitness, is_chromosome_order_correct
+from sampo.scheduler.genetic.base import GeneticScheduler
+from sampo.scheduler.genetic.operators import init_toolbox, TimeAndResourcesFitness, is_chromosome_order_correct, \
+    TimeFitness
 from sampo.scheduler.heft.base import HEFTScheduler
 from sampo.schemas.contractor import Contractor, WorkerContractorPool
 from sampo.schemas.graph import WorkGraph, GraphNode
@@ -19,9 +21,9 @@ from sampo.utilities.collections import reverse_dictionary
 
 @pytest.fixture(scope='session')
 def setup_wg():
-    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=40,
-                                                         uniq_works=5,
-                                                         uniq_resources=10)
+    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=500,
+                                                         uniq_works=15,
+                                                         uniq_resources=50)
     return wg
 
 
@@ -41,6 +43,22 @@ def setup_worker_pool(setup_contractors) -> WorkerContractorPool:
 
 
 @pytest.fixture(scope='session', params=[HEFTScheduler])
+def setup_schedule_heft(request, setup_wg, setup_contractors) -> Schedule:
+    scheduler: Callable[[], Scheduler] = request.param
+
+    schedule = scheduler().schedule(setup_wg, setup_contractors)
+    return schedule
+
+
+@pytest.fixture(scope='session', params=[GeneticScheduler])
+def setup_schedule_genetic(request, setup_wg, setup_contractors) -> Schedule:
+    scheduler: Callable[[], Scheduler] = request.param
+
+    schedule = scheduler().schedule(setup_wg, setup_contractors)
+    return schedule
+
+
+@pytest.fixture(scope='session', params=[HEFTScheduler, GeneticScheduler])
 def setup_schedule(request, setup_wg, setup_contractors) -> Schedule:
     scheduler: Callable[[], Scheduler] = request.param
 
@@ -144,6 +162,8 @@ def create_toolbox(wg: WorkGraph,
 
     toolbox.register('get_worker_reqs', lambda: resources_border)
     toolbox.register('is_order_correct', is_chromosome_order_correct, parents=parents)
-    toolbox.register('evaluate2', lambda chromosome, fitness: float(fitness.evaluate(chromosome).value),
+    toolbox.register('evaluate_time_res', lambda chromosome, fitness: float(fitness.evaluate(chromosome).value),
                      fitness=TimeAndResourcesFitness(toolbox))
+    toolbox.register('evaluate_time', lambda chromosome, fitness: float(fitness.evaluate(chromosome).value),
+                     fitness=TimeFitness(toolbox))
     return toolbox
