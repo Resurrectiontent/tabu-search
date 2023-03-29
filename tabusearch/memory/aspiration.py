@@ -31,7 +31,7 @@ class AspirationCriterion(MemoryCriterion, ABC):
                  move_aspiration: Optional[SolutionQualityFactory] = None):
         super().__init__()
 
-        self._aspiration_comparison = gt if bound_type is AspirationBoundType.Greater else ge
+        self._aspiration_comparison = ge if bound_type is AspirationBoundType.GreaterEquals else gt
         self._get_solution_aspiration = attrgetter('quality') if move_aspiration is None else move_aspiration
         self._aspiration_bound = NAN
 
