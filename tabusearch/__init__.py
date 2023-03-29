@@ -74,7 +74,7 @@ class TabuSearch(ABC, Generic[TData]):
             self._memory = self.tabu.unite(self.aspiration)
         return self._memory
 
-    def optimize(self, x0: TData):
+    def optimize(self, x0: TData) -> Solution[TData]:
         # TODO: move to memorize_move
         history = []
 
