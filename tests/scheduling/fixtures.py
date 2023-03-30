@@ -1,10 +1,14 @@
 from collections import defaultdict
+from functools import partial
+
+from scipy.stats import expon, norm
 from typing import Callable
 
 import numpy as np
 import pytest
 from deap.base import Toolbox
 
+from tabusearch.convergence import DisjunctiveConvergence, IterativeConvergence, EnhancementConvergence
 from sampo import generator
 from sampo.scheduler.base import Scheduler
 from sampo.scheduler.genetic.base import GeneticScheduler
@@ -17,19 +21,50 @@ from sampo.schemas.schedule import Schedule
 from sampo.schemas.schedule_spec import ScheduleSpec
 from sampo.schemas.time_estimator import WorkTimeEstimator
 from sampo.utilities.collections import reverse_dictionary
+from tabusearch import TabuSearch
 
 
-@pytest.fixture(scope='session')
-def setup_wg():
-    wg = generator.SimpleSynthetic().advanced_work_graph(works_count_top_border=500,
-                                                         uniq_works=15,
-                                                         uniq_resources=50)
-    return wg
+@pytest.fixture(scope='session', params=[('static', None, lambda x: lambda _: x),
+                                         ('statistic',
+                                          lambda collection_len: min(expon.rvs(size=1).astype(int)[0],
+                                                                     collection_len - 1),
+                                          lambda x: lambda _: norm.rvs(x, 5, size=1).astype(int)[0])])
+def setup_base_optimisers(request, setup_wg):
+    name, selection, tabu = request.param
+    match setup_wg[0]:
+        case 'medium':
+            tabu_time, conv_ord, conv_res = 10, 15, 63
+        case 'large':
+            tabu_time, conv_ord, conv_res = 15, 20, 79
+        case _:
+            tabu_time, conv_ord, conv_res = 3, 10, 50
+
+    optimiser_ord = partial(TabuSearch,
+                            convergence_criterion=DisjunctiveConvergence(IterativeConvergence(100),
+                                                                         EnhancementConvergence(2, conv_ord)),
+                            tabu_time=tabu(tabu_time),
+                            selection=selection)
+    optimiser_res = partial(TabuSearch,
+                            convergence_criterion=DisjunctiveConvergence(IterativeConvergence(500),
+                                                                         EnhancementConvergence(2, conv_ord)),
+                            tabu_time=tabu(tabu_time),
+                            selection=selection)
+
+    return name, optimiser_ord, optimiser_res
+
+
+@pytest.fixture(scope='session', params=[('small', 50, 20, 15),
+                                         ('medium', 200, 40, 20),
+                                         ('large', 500, 70, 50)])
+def setup_wg(request):
+    name, *params = request.param
+    wg = generator.SimpleSynthetic().advanced_work_graph(*params)
+    return name, wg
 
 
 @pytest.fixture(scope='session')
 def setup_contractors(setup_wg):
-    contractors = [generator.get_contractor_by_wg(setup_wg)]
+    contractors = [generator.get_contractor_by_wg(setup_wg[1])]
     return contractors
 
 
@@ -46,7 +81,7 @@ def setup_worker_pool(setup_contractors) -> WorkerContractorPool:
 def setup_schedule_heft(request, setup_wg, setup_contractors) -> Schedule:
     scheduler: Callable[[], Scheduler] = request.param
 
-    schedule = scheduler().schedule(setup_wg, setup_contractors)
+    schedule = scheduler().schedule(setup_wg[1], setup_contractors)
     return schedule
 
 
@@ -54,7 +89,7 @@ def setup_schedule_heft(request, setup_wg, setup_contractors) -> Schedule:
 def setup_schedule_genetic(request, setup_wg, setup_contractors) -> Schedule:
     scheduler: Callable[[], Scheduler] = request.param
 
-    schedule = scheduler().schedule(setup_wg, setup_contractors)
+    schedule = scheduler().schedule(setup_wg[1], setup_contractors)
     return schedule
 
 
@@ -62,7 +97,7 @@ def setup_schedule_genetic(request, setup_wg, setup_contractors) -> Schedule:
 def setup_schedule(request, setup_wg, setup_contractors) -> Schedule:
     scheduler: Callable[[], Scheduler] = request.param
 
-    schedule = scheduler().schedule(setup_wg, setup_contractors)
+    schedule = scheduler().schedule(setup_wg[1], setup_contractors)
     return schedule
 
 
@@ -75,7 +110,7 @@ def setup_toolbox(setup_wg, setup_contractors, setup_worker_pool) -> Toolbox:
       schedule_to_chromosome
       chromosome_to_schedule
     """
-    return create_toolbox(setup_wg,
+    return create_toolbox(setup_wg[1],
                           setup_contractors,
                           setup_worker_pool)
 

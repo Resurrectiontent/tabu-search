@@ -47,7 +47,7 @@ class TabuSearch(ABC, Generic[TData]):
                  metric: Callable[[TData], SolutionQualityInfo]
                          | Iterable[Callable[[TData], SolutionQualityInfo]],
                  hall_of_fame_size: int = 5,
-                 max_iter: int = 100,
+                 convergence_criterion: ConvergenceCriterion | int = 100,
                  tabu_time: Callable[[Solution[TData]], int] | int = 5,
                  selection: Callable[[], int] | None = None,
                  metric_aggregation: Callable[[Iterable[BaseSolutionQualityInfo]], BaseAggregatedSolutionQualityInfo]
@@ -59,7 +59,9 @@ class TabuSearch(ABC, Generic[TData]):
 
         self.hall_of_fame = SortedList(key=attrgetter('quality'))
         # TODO: move convergence to arguments
-        self.convergence_criterion = IterativeConvergence(max_iter)
+        self.convergence_criterion = IterativeConvergence(convergence_criterion) \
+            if isinstance(convergence_criterion, int) \
+            else convergence_criterion
         self.solution_factory = SolutionFactory((*metric,) if isinstance(metric, Iterable) else metric,
                                                 metrics_aggregation=metric_aggregation)
         mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]

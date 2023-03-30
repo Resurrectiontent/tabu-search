@@ -45,7 +45,7 @@ def test_optimisation(setup_func_x0):
 
     optimiser = TabuSearch(mutation_behaviour=[NearestNeighboursMutation, FullAxisShiftMutation],
                            metric=custom_metric(function.__name__, function, minimized=True),
-                           max_iter=1000,
+                           convergence_criterion=1000,
                            tabu_time=np.prod(x0.shape),
                            selection=lambda collection_len: min(expon.rvs(size=1).astype(int)[0], collection_len - 1))
     s = optimiser.optimize(x0)

@@ -7,4 +7,4 @@ sortedcontainers~=2.4.0
 matplotlib~=3.6.2
 scipy~=1.9.3
 pytest~=7.2.2
-sampo~=0.1.1.120
+sampo~=0.1.1.122

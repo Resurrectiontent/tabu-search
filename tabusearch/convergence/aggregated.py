@@ -5,7 +5,7 @@ from tabusearch.convergence.base import ConvergenceCriterion
 
 class AggregatedConvergence(ConvergenceCriterion, ABC):
     def __init__(self, *args):
-        self.criteria = [c for c in args if issubclass(c, ConvergenceCriterion)]
+        self.criteria = [c for c in args if issubclass(type(c), ConvergenceCriterion)]
 
     def _convergence_results(self, **kwargs):
         return [c.converged(**kwargs) for c in self.criteria]

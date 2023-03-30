@@ -14,7 +14,9 @@ class EnhancementConvergence(ConvergenceCriterion):
 
     def converged(self, new_result: SolutionQualityInfo, **kwargs):
         new = float(new_result)
-        res = 0 <= new - max(self.quality_history) <= self.min_enhancement if self.quality_history else False
+        res = new - min(self.quality_history) <= self.min_enhancement \
+            if len(self.quality_history) == self.quality_history.maxlen \
+            else False
         self.quality_history.append(new)
         return res
 

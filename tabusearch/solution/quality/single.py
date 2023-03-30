@@ -21,6 +21,13 @@ class SolutionQualityInfo(BaseSolutionQualityInfo, Generic[TData]):
         self._minimized = minimized
 
     @property
+    def value(self):
+        """
+        The real value of quality function, not depending on whether it is minimized or not.
+        """
+        return self._float
+
+    @property
     def _float(self):
         if self._float_n is NAN:
             self._float_n = self._float_f()
@@ -35,9 +42,10 @@ class SolutionQualityInfo(BaseSolutionQualityInfo, Generic[TData]):
     def __float__(self) -> float:
         """
         Float representation of the solution quality.
+        Is negated, if the function is minimised to support proper comparison.
         Comparable with float representations of solution quality objects of same types.
         """
         return -self._float if self._minimized else self._float
 
     def __str__(self) -> str:
-        return f'{self.name} ({float(self)})'
+        return f'{self.name} ({self.value})'
