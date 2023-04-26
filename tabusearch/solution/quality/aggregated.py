@@ -18,7 +18,7 @@ class BaseAggregatedSolutionQualityInfo(BaseSolutionQualityInfo, ABC):
     Implements no abstract logic. Created for marking SolutionQualityInfo aggregating classes via inheritance.
     Inherited classes should also
     """
-    pass
+    _data: list
 
 
 class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
@@ -45,6 +45,7 @@ class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo, BaseAggregatedSo
         # may remain unused
         def value_str(metr):
             return '\n'.join(list(map(str, metr)))
+
         # most likely will be used
         float_n = aggregation(map(float, metrics))
-        super().__init__(metrics, name, float_n, False, value_str)
+        super().__init__(list(metrics), name, float_n, False, value_str)
