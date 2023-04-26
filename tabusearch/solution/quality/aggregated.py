@@ -46,5 +46,5 @@ class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo, BaseAggregatedSo
         def value_str(metr):
             return '\n'.join(list(map(str, metr)))
         # most likely will be used
-        float_v = aggregation(map(float, metrics))
-        super().__init__(metrics, name, float_v, False, value_str)
+        float_n = aggregation(map(float, metrics))
+        super().__init__(metrics, name, float_n, False, value_str)
