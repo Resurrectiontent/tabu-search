@@ -1,6 +1,7 @@
 from collections import defaultdict
 from functools import partial
 
+from sampo.generator import ContractorGenerationMethod
 from scipy.stats import expon, norm
 from typing import Callable
 
@@ -8,6 +9,7 @@ import numpy as np
 import pytest
 from deap.base import Toolbox
 
+from sampo.scheduler.topological.base import TopologicalScheduler, RandomizedTopologicalScheduler
 from tabusearch.convergence import DisjunctiveConvergence, IterativeConvergence, EnhancementConvergence
 from sampo import generator
 from sampo.scheduler.base import Scheduler
@@ -24,46 +26,67 @@ from sampo.utilities.collections import reverse_dictionary
 from tabusearch import TabuSearch
 
 
-@pytest.fixture(scope='session', params=[('static', None, lambda x: lambda _: x),
+@pytest.fixture(scope='session', params=[#('static', None, lambda x: lambda _: x),
                                          ('statistic',
                                           lambda collection_len: min(expon.rvs(size=1).astype(int)[0],
                                                                      collection_len - 1),
-                                          lambda x: lambda _: norm.rvs(x, 5, size=1).astype(int)[0])])
+                                          lambda x: lambda _: norm.rvs(x, 5, size=1).astype(int)[0])
+                                         ])
 def setup_base_optimisers(request, setup_wg):
     name, selection, tabu = request.param
+
     match setup_wg[0]:
         case 'medium':
-            tabu_time, conv_ord, conv_res = 10, 15, 63
+            tabu_time, conv_ord, conv_res = 10, 15, 20
         case 'large':
-            tabu_time, conv_ord, conv_res = 15, 20, 79
+            tabu_time, conv_ord, conv_res = 15, 20, 25
+        case 'small':
+            tabu_time, conv_ord, conv_res = 3, 10, 15
         case _:
-            tabu_time, conv_ord, conv_res = 3, 10, 50
+            mul = int(setup_wg[0].split('-')[-1])
+            tabu_time, conv_ord, conv_res = mul // 20, 5, 5
 
     optimiser_ord = partial(TabuSearch,
-                            convergence_criterion=DisjunctiveConvergence(IterativeConvergence(100),
-                                                                         EnhancementConvergence(2, conv_ord)),
+                            convergence_criterion=DisjunctiveConvergence(IterativeConvergence(15 * conv_ord),
+                                                                         EnhancementConvergence(1, conv_ord)),
                             tabu_time=tabu(tabu_time),
                             selection=selection)
     optimiser_res = partial(TabuSearch,
-                            convergence_criterion=DisjunctiveConvergence(IterativeConvergence(500),
-                                                                         EnhancementConvergence(2, conv_ord)),
+                            convergence_criterion=DisjunctiveConvergence(IterativeConvergence(8 * conv_res),
+                                                                         EnhancementConvergence(1, conv_res)),
                             tabu_time=tabu(tabu_time),
                             selection=selection)
 
     return name, optimiser_ord, optimiser_res
 
 
-@pytest.fixture(scope='session', params=[('small', 50, 20, 15),
-                                         ('medium', 200, 40, 20),
-                                         ('large', 500, 70, 50)])
+@pytest.fixture(scope='session', params=[#('wg-50', 50, 25, 15),
+                                         ('wg-100', 100, 35, 17),
+                                         ('wg-150', 150, 40, 20),
+                                         ('wg-225', 225, 50, 30),
+                                         ('wg-300', 300, 60, 40),
+                                         ('wg-400', 400, 70, 50)
+                                         #('small', 80, 30, 17),
+                                         #('medium', 150, 40, 20),
+                                         #('large', 250, 60, 40),
+                                         #('real-0', 'wg_0'),
+                                         #('real-1', 'wg_1')
+                                        ])
 def setup_wg(request):
     name, *params = request.param
-    wg = generator.SimpleSynthetic().advanced_work_graph(*params)
+    if 'real' in name:
+        wg = WorkGraph.load(f'scheduling/resources/{params[0]}', 'work_graph')
+    else:
+        wg = generator.SimpleSynthetic().advanced_work_graph(*params)
     return name, wg
 
 
 @pytest.fixture(scope='session')
 def setup_contractors(setup_wg):
+    # if 'real' in setup_wg[0]:
+    #     contractors = [Contractor.load(f'scheduling/resources/wg_{setup_wg[0].split("-")[-1]}', f'contractor_{i}')
+    #                    for i in range(2)]
+    # else:
     contractors = [generator.get_contractor_by_wg(setup_wg[1])]
     return contractors
 
@@ -77,6 +100,14 @@ def setup_worker_pool(setup_contractors) -> WorkerContractorPool:
     return worker_pool
 
 
+@pytest.fixture(scope='session', params=[RandomizedTopologicalScheduler])
+def setup_schedule_topo(request, setup_wg, setup_contractors) -> Schedule:
+    scheduler: Callable[[], Scheduler] = request.param
+
+    schedule = scheduler().schedule(setup_wg[1], setup_contractors)
+    return schedule
+
+
 @pytest.fixture(scope='session', params=[HEFTScheduler])
 def setup_schedule_heft(request, setup_wg, setup_contractors) -> Schedule:
     scheduler: Callable[[], Scheduler] = request.param
@@ -88,7 +119,6 @@ def setup_schedule_heft(request, setup_wg, setup_contractors) -> Schedule:
 @pytest.fixture(scope='session', params=[GeneticScheduler])
 def setup_schedule_genetic(request, setup_wg, setup_contractors) -> Schedule:
     scheduler: Callable[[], Scheduler] = request.param
-
     schedule = scheduler().schedule(setup_wg[1], setup_contractors)
     return schedule
 

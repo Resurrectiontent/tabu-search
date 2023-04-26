@@ -5,6 +5,7 @@ from operator import attrgetter
 from sortedcontainers import SortedList
 from typing import Iterable, Callable, Generic
 
+from memory import AspirationBoundType
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
 from tabusearch.memory import AspirationCriterion, TabuList
@@ -66,7 +67,7 @@ class TabuSearch(ABC, Generic[TData]):
                                                 metrics_aggregation=metric_aggregation)
         mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]
         self.mutation_behaviour = [mutation(self.solution_factory) for mutation in mutation_behaviour]
-        self.aspiration = AspirationCriterion()
+        self.aspiration = AspirationCriterion(AspirationBoundType.GreaterEquals)
         self.tabu = TabuList(tabu_time)
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))
 
@@ -84,12 +85,14 @@ class TabuSearch(ABC, Generic[TData]):
         history.append(copy(x))
 
         while True:
-
             neighbours = self.get_neighbours(x)
-            x = self.choose(neighbours)
-            self.memorize_move(x)
+            choice = self.choose(neighbours)
+            if choice is not None:
+                x = choice
+                self.memorize_move(x)
 
-            history.append(copy(x))
+            # Memorize None, if choice failed
+            history.append(copy(choice))
 
             if self.converged(x):
                 break
@@ -103,7 +106,7 @@ class TabuSearch(ABC, Generic[TData]):
 
     def choose(self, neighbours: Iterable[Solution]) -> Solution:
         neighbours = SortedList(neighbours, key=attrgetter('quality'))
-        return self.solution_selection(neighbours)
+        return self.solution_selection(neighbours) if neighbours else None
 
     def memorize_move(self, move: Solution):
         self._memory.memorize(move)
