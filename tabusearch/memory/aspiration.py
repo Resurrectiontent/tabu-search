@@ -5,7 +5,7 @@ from typing import Iterable, Set, Callable, Optional
 
 from numpy import NAN
 
-from tabusearch.memory.base import MemoryCriterion
+from tabusearch.memory.base import FilteringMemoryCriterion
 from tabusearch.solution.base import Solution
 from tabusearch.solution.id import SolutionId
 from tabusearch.solution.quality.base import BaseSolutionQualityInfo
@@ -20,7 +20,7 @@ class AspirationBoundType(Enum):
     GreaterEquals = auto()
 
 
-class AspirationCriterion(MemoryCriterion, ABC):
+class AspirationCriterion(FilteringMemoryCriterion, ABC):
     _aspiration_bound: BaseSolutionQualityInfo
 
     _aspiration_comparison: Callable[[BaseSolutionQualityInfo, BaseSolutionQualityInfo], bool]

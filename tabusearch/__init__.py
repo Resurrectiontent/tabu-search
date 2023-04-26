@@ -9,7 +9,7 @@ from memory import AspirationBoundType
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
 from tabusearch.memory import AspirationCriterion, TabuList
-from tabusearch.memory.base import BaseMemoryCriterion
+from tabusearch.memory.base import BaseFilteringMemoryCriterion
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
@@ -38,7 +38,7 @@ class TabuSearch(ABC, Generic[TData]):
     aspiration: AspirationCriterion
     tabu: TabuList
     solution_selection: SolutionSelection
-    _memory: BaseMemoryCriterion
+    _memory: BaseFilteringMemoryCriterion
 
     _history: list
 
@@ -102,7 +102,7 @@ class TabuSearch(ABC, Generic[TData]):
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
         possible_moves = chain(*[behaviour.mutate(x) for behaviour in self.mutation_behaviour])
-        return self.resulting_memory_criterion.filter(possible_moves)
+        return self.resulting_memory_criterion.apply(possible_moves)
 
     def choose(self, neighbours: Iterable[Solution]) -> Solution:
         neighbours = SortedList(neighbours, key=attrgetter('quality'))
