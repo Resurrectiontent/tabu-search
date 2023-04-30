@@ -65,8 +65,7 @@ class TabuSearch(ABC, Generic[TData]):
             else convergence_criterion
         self.solution_factory = SolutionFactory((*metric,) if isinstance(metric, Iterable) else metric,
                                                 metrics_aggregation=metric_aggregation)
-        mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]
-        self.mutation_behaviour = [mutation(self.solution_factory) for mutation in mutation_behaviour]
+        self.mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]
         self.aspiration = AspirationCriterion(AspirationBoundType.GreaterEquals)
         self.tabu = TabuList(tabu_time)
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))

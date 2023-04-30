@@ -7,16 +7,19 @@ from tabusearch.typing_ import TData
 
 
 class MutationBehaviour(ABC, Generic[TData]):
-    def __init__(self, general_solution_factory: SolutionFactory):
-        self._solution_factory = general_solution_factory.for_solution_generator(self._mutation_type)
+    # TODO: erase
+    # def __init__(self, general_solution_factory: SolutionFactory):
+    #     self._solution_factory = general_solution_factory.for_solution_generator(self._mutation_type)
 
-    def mutate(self, pivot: Solution) -> List[Solution]:
+    def mutate(self, pivot: Solution) -> Iterable[Tuple[TData, str]]:
         """
         Main interface for generation of new solution space.
         :param pivot: Previous solution, whom neighbourhood should be found.
         :return: New solution space.
         """
-        return [self._solution_factory(*mutation) for mutation in self._generate_mutations(pivot.position)]
+        # TODO: erase
+        # return [self._solution_factory(*mutation) for mutation in self._generate_mutations(pivot.position)]
+        return self._generate_mutations(pivot.position)
 
     @property
     @abstractmethod
