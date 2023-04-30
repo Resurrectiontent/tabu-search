@@ -31,15 +31,14 @@ class GradientAccelerator(BaseMemoryCriterion):
         # TODO: implement quality updating mechanism
         match self._allow_2p_grad, len(self._history_points):
             case True, 1:
-                return [s.update_quality(sum(
-                    pseudogradient_2p(self._history_points[0], s.position,
-                                      self._history_values[0], s.quality.value))) for s in x]
+                weights = np.array([sum(pseudogradient_2p(self._history_points[0], s.position,
+                                                          self._history_values[0], s.quality.value)) for s in x])
+                weights_normalized = (weights-weights.min())/(weights.max()-weights.min())
             case _, 2:
-                return [s.update_quality(sum(
-                    pseudogradient(list(self._history_points) + [s.position],
-                                   list(self._history_values) + [s.quality.value]))) for s in x]
+                weights = np.array([sum(pseudogradient(list(self._history_points) + [s.position],
+                                                       list(self._history_values) + [s.quality.value])) for s in x])
             case _, _:
-                return x
+                weights = np.ones(len(x))
 
 
 def pseudogradient_2p(point1: NDArray, point2: NDArray, val1: float, val2: float):
@@ -96,4 +95,3 @@ def pseudogradient(points: list[NDArray], values: list[float]):
         pgvalues += values[i] * np.exp(np.dot(delta, pg))
 
     return pg * pgvalues
-
