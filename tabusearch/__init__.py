@@ -44,8 +44,8 @@ class TabuSearch(ABC, Generic[TData]):
 
     # TODO: consider further ctor conveniences
     def __init__(self, mutation_behaviour: MutationBehaviour | list[MutationBehaviour],
-                 metric: Callable[[TData], SolutionQualityInfo]
-                         | Iterable[Callable[[TData], SolutionQualityInfo]],
+                 metric: Callable[[list[TData]], list[SolutionQualityInfo]]
+                         | Iterable[Callable[[list[TData]], list[SolutionQualityInfo]]],
                  hall_of_fame_size: int = 5,
                  convergence_criterion: ConvergenceCriterion | int = 100,
                  tabu_time: Callable[[Solution[TData]], int] | int = 5,
