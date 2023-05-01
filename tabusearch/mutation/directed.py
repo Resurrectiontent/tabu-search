@@ -1,10 +1,9 @@
 from abc import ABC
 from enum import IntEnum
 from functools import partialmethod
-from typing import Callable, Tuple, List, Iterable, Optional, Generic
+from typing import Callable, Generic
 
 from tabusearch.mutation.base import MutationBehaviour
-from tabusearch.solution.factory import SolutionFactory
 from tabusearch.utils.decorators import return_self_method
 from typing_ import TData
 
@@ -42,8 +41,8 @@ class BidirectionalMutationBehaviour(MutationBehaviour[TData], ABC, Generic[TDat
       By default, one of them (which exists) is called in _generate_mutations.
       To change this, override _generate_mutations
     """
-    _generate_one_direction_mutation: Callable[[TData, bool], Tuple[TData, str]]
-    _generate_one_direction_mutations: Callable[[TData, bool], List[Tuple[TData, str]]]
+    _generate_one_direction_mutation: Callable[[TData, bool], tuple[TData, str]]
+    _generate_one_direction_mutations: Callable[[TData, bool], list[tuple[TData, str]]]
 
     _direction: MutationDirection = MutationDirection.Bidirectional
 
@@ -60,14 +59,14 @@ class BidirectionalMutationBehaviour(MutationBehaviour[TData], ABC, Generic[TDat
     to_bidirectional = partialmethod(direction.fset, MutationDirection.Bidirectional)
     def reverse_direction(self): self._direction = self._direction.reversed()
 
-    def __init__(self, general_solution_factory: SolutionFactory,
-                 mutation_direction: Optional[MutationDirection] = None):
+    def __init__(self, mutation_type: str,
+                 mutation_direction: MutationDirection | None = None):
         """
         Initializes BidirectionalMutationBehaviour.
-        :param general_solution_factory: General solution factory
+        :param mutation_type: Name of mutation
         :param mutation_direction: Direction of mutation. MutationDirection.Positive by default
         """
-        super().__init__(general_solution_factory)
+        super().__init__(mutation_type)
         if mutation_direction:
             self._direction = mutation_direction
 
@@ -77,7 +76,7 @@ class BidirectionalMutationBehaviour(MutationBehaviour[TData], ABC, Generic[TDat
         list(map(self_decorate,
                  ['to_negative_direction', 'to_positive_direction', 'to_bidirectional', 'reverse_direction']))
 
-    def _generate_mutations(self, x: TData) -> Iterable[Tuple[TData, str]]:
+    def _generate_mutations(self, x: TData) -> list[tuple[TData, str]]:
         """
         Default implementation for bidirectional mutations. Override, if you need to change it.
         """

@@ -63,9 +63,11 @@ class TabuSearch(ABC, Generic[TData]):
         self.convergence_criterion = IterativeConvergence(convergence_criterion) \
             if isinstance(convergence_criterion, int) \
             else convergence_criterion
+        self.mutation_behaviour = mutation_behaviour \
+            if isinstance(mutation_behaviour, Iterable) \
+            else [mutation_behaviour]
         self.solution_factory = SolutionFactory((*metric,) if isinstance(metric, Iterable) else metric,
                                                 metrics_aggregation=metric_aggregation)
-        self.mutation_behaviour = mutation_behaviour if isinstance(mutation_behaviour, Iterable) else [mutation_behaviour]
         self.aspiration = AspirationCriterion(AspirationBoundType.GreaterEquals)
         self.tabu = TabuList(tabu_time)
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))
@@ -100,8 +102,9 @@ class TabuSearch(ABC, Generic[TData]):
         return self.hall_of_fame[-1]
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
-        possible_moves = chain(*[behaviour.mutate(x) for behaviour in self.mutation_behaviour])
-        return self.resulting_memory_criterion.apply(possible_moves)
+        generated = [(behaviour.mutation_type, behaviour.mutate(x)) for behaviour in self.mutation_behaviour]
+        solutions = self.solution_factory(generated)
+        return self.resulting_memory_criterion.apply(solutions)
 
     def choose(self, neighbours: Iterable[Solution]) -> Solution:
         neighbours = SortedList(neighbours, key=attrgetter('quality'))

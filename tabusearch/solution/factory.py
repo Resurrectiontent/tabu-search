@@ -1,5 +1,6 @@
 from copy import copy
 from functools import partial
+from itertools import chain
 from typing import Callable, Iterable, Optional, Generic
 
 from tabusearch.solution.base import Solution
@@ -17,29 +18,17 @@ class SolutionFactory(Generic[TData]):
     def __init__(self, *metrics: Callable[[TData], BaseSolutionQualityInfo],
                  metrics_aggregation: Optional[Callable[[Iterable[BaseSolutionQualityInfo]],
                                                         BaseAggregatedSolutionQualityInfo]] = None):
-        self._id_factory = None
-
         self._quality_factory = SolutionQualityFactory(*metrics,
                                                        metrics_aggregation=metrics_aggregation)
 
-    @property
-    def is_initialized(self):
-        return self._id_factory is not None
+    def __call__(self, generated: list[tuple[str, list[tuple[TData, str]]]]) -> list[Solution[TData]]:
+        solutions: list[tuple[SolutionId, TData]] = list(chain(*[[(SolutionId(generator_name, *name_suffix), position)
+                                                                  for position, *name_suffix in solutions]
+                                                                 for generator_name, solutions in generated]))
 
-    def __call__(self, position: TData, *name_suffix: str) -> Solution[TData]:
-        assert self._id_factory, 'SolutionFactory is not initialized.' \
-                                 ' Make a solution generator specific factory by calling' \
-                                 ' generator_solution_factory = general_solution_factory.' \
-                                 'for_solution_generator(generator_name).'
-        return Solution(self._id_factory(name_suffix),
-                        position,
-                        self._quality_factory(position))
+        qualities = self._quality_factory([position for _, position in solutions])
+        return [Solution(solution_id, position, quality)
+                for (solution_id, position), quality in zip(solutions, qualities)]
 
     def initial(self, position: TData) -> Solution[TData]:
-        return Solution(SolutionId('Init'), position, self._quality_factory(position))
-
-    def for_solution_generator(self, generator_name: str) -> 'SolutionFactory[TData]':
-        specialized = copy(self)
-        specialized._id_factory = partial(SolutionId, generator_name)
-        return specialized
-
+        return Solution(SolutionId('Init'), position, self._quality_factory.single(position))

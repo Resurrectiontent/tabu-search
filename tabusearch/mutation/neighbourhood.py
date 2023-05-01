@@ -1,6 +1,5 @@
 from functools import partial
 from operator import add
-from typing import Tuple, List
 
 from numpy.typing import NDArray
 
@@ -17,9 +16,10 @@ class NearestNeighboursMutation(BidirectionalMutationBehaviour[NDArray]):
     [0,0,0] -> [1,0,0], [0,1,0], [0,0,1] and/or [-1,0,0], [0,-1,0], [0,0,-1]
     ```
     """
-    _mutation_type = 'NN'
+    def __init__(self):
+        super().__init__('NN')
 
-    def _generate_one_direction_mutations(self, x: NDArray, negative: bool) -> List[Tuple[NDArray, str, str]]:
+    def _generate_one_direction_mutations(self, x: NDArray, negative: bool) -> list[tuple[NDArray, str, str]]:
         inc = partial(add, 1)
         dec = partial(add, -1)
 
@@ -40,9 +40,10 @@ class FullAxisShiftMutation(BidirectionalMutationBehaviour[NDArray]):
     [0,0,0] -> [1,1,1] and/or [-1,-1,-1]
     ```
     """
-    _mutation_type = 'FullShift'
+    def __init__(self):
+        super().__init__('FullShift')
 
-    def _generate_one_direction_mutation(self, x: NDArray, negative: bool) -> Tuple[NDArray, str]:
+    def _generate_one_direction_mutation(self, x: NDArray, negative: bool) -> tuple[NDArray, str]:
         inc = partial(add, 1)
         dec = partial(add, -1)
 

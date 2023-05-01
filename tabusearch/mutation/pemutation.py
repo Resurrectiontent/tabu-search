@@ -1,5 +1,3 @@
-from typing import Iterable, Tuple
-
 from numpy.typing import NDArray
 
 from tabusearch.mutation.base import MutationBehaviour
@@ -13,9 +11,10 @@ class Swap2Mutation(MutationBehaviour[NDArray]):
     """
     Implements mutation behaviour, in which all pairs of (non-equal) elements are permuted in different solutions.
     """
-    _mutation_type = 'Swap2'
+    def __init__(self):
+        super().__init__('Swap2')
 
-    def _generate_mutations(self, x: NDArray) -> Iterable[Tuple[NDArray, str]]:
+    def _generate_mutations(self, x: NDArray) -> list[tuple[NDArray, str]]:
         r = []
         for i in range(len(x) - 1):
             for j in range(i + 1, len(x)):
@@ -36,10 +35,11 @@ class Swap3Mutation(BidirectionalMutationBehaviour[NDArray]):
     can be permuted in all two possible ways:
     ```([1,2,3] -> [2,3,1] and/or [3,1,2])``` in different solutions.
     """
-    _mutation_type = 'Swap3Single'
+    def __init__(self):
+        super().__init__('Swap3Single')
 
     # Override default logics to reduce cycle initializations
-    def _generate_mutations(self, x: NDArray) -> Iterable[Tuple[NDArray, str]]:
+    def _generate_mutations(self, x: NDArray) -> list[tuple[NDArray, str]]:
         r = []
         for i in range(len(x) - 2):
             for j in range(i + 1, len(x) - 1):
@@ -56,7 +56,7 @@ class Swap3Mutation(BidirectionalMutationBehaviour[NDArray]):
         if self.direction.is_positive:
             container.append(self._generate_one_permute(x, idx, values, False))
 
-    def _generate_one_permute(self, x, idx, values, negative: bool) -> Tuple[NDArray, str]:
+    def _generate_one_permute(self, x, idx, values, negative: bool) -> tuple[NDArray, str]:
         values = self._rotate(values, negative)
         x = x.copy()
         x[idx] = values
