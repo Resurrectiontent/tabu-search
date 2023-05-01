@@ -43,7 +43,7 @@ def test_optimisation(setup_func_x0):
     function = setup_func_x0['function']
     x0 = setup_func_x0['x0']
 
-    optimiser = TabuSearch(mutation_behaviour=[NearestNeighboursMutation, FullAxisShiftMutation],
+    optimiser = TabuSearch(mutation_behaviour=[NearestNeighboursMutation(), FullAxisShiftMutation()],
                            metric=custom_metric(function.__name__, function, minimized=True),
                            convergence_criterion=100,
                            tabu_time=np.prod(x0.shape),

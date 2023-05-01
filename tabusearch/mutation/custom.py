@@ -1,4 +1,4 @@
-from typing import Callable, Iterable
+from typing import Callable
 
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.typing_ import TData
