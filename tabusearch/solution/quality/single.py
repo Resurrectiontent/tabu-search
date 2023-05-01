@@ -10,9 +10,9 @@ from tabusearch.typing_ import TData
 class SolutionQualityInfo(BaseSolutionQualityInfo, Generic[TData]):
     def __init__(self, data: TData,
                  name: str,
-                 float_: Union[float, int, Callable[[TData], float]],
-                 minimized: Optional[bool] = False,
-                 value_str: Optional[Union[str, Callable[[TData], str]]] = str):
+                 float_: float | int | Callable[[TData], float],
+                 minimized: bool | None = False,
+                 value_str: str | Callable[[TData], str] | None = str):
         value_str = value_str(data) if callable(value_str) else value_str
         super().__init__(f'{name}({"min" if minimized else "max"})', value_str)
 

@@ -1,6 +1,6 @@
 from typing import Generic
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from tabusearch.solution.id import SolutionId
 from tabusearch.solution.quality.base import BaseSolutionQualityInfo
