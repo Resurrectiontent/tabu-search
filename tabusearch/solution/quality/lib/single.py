@@ -12,20 +12,23 @@ from tabusearch.solution.quality.single import SolutionQualityInfo
 
 # TODO: rewrite for iterable
 def sum_metric(name: str, weights: NDArray[Number] | Iterable[Number] | None = None, **kwargs) \
-        -> Callable[[NDArray[Number]], SolutionQualityInfo]:
+        -> Callable[[list[NDArray[Number]]], list[SolutionQualityInfo]]:
     weights = weights and (weights if isinstance(weights, ndarray) else np.array(weights))
     float_ = weights and (lambda x: (x * weights).sum()) or np.sum
+    single_factory = partial(SolutionQualityInfo, name=name, float_=float_, **kwargs)
 
-    return partial(SolutionQualityInfo, name=name, float_=float_, **kwargs)
+    def iter_metric(x: list[TData]) -> list[SolutionQualityInfo]:
+        return list(map(single_factory, x))
+
+    return iter_metric
 
 
-# TODO: fix typing hints
 def custom_metric(name: str, evaluation: Callable[[TData], float], **kwargs) \
-        -> Callable[[TData], SolutionQualityInfo]:
+        -> Callable[[list[TData]], list[SolutionQualityInfo]]:
     single_factory = partial(SolutionQualityInfo, name=name, float_=evaluation, **kwargs)
 
-    def iter_metric(x: list[TData]) -> list[float]:
-        return [single_factory(s) for s in x]
+    def iter_metric(x: list[TData]) -> list[SolutionQualityInfo]:
+        return list(map(single_factory, x))
 
     return iter_metric
 

@@ -43,8 +43,7 @@ class TabuSearch(ABC, Generic[TData]):
     _history: list
 
     # TODO: consider further ctor conveniences
-    def __init__(self, mutation_behaviour: Callable[[SolutionFactory], MutationBehaviour]
-                                           | Iterable[Callable[[SolutionFactory], MutationBehaviour]],
+    def __init__(self, mutation_behaviour: MutationBehaviour | list[MutationBehaviour],
                  metric: Callable[[TData], SolutionQualityInfo]
                          | Iterable[Callable[[TData], SolutionQualityInfo]],
                  hall_of_fame_size: int = 5,
