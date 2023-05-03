@@ -22,7 +22,7 @@ class BaseAggregatedSolutionQualityInfo(BaseSolutionQualityInfo, ABC):
 
 
 class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
-    def __init__(self, *metrics, name: str, aggregation: [Callable[[Iterable[bool]], bool]]):
+    def __init__(self, metrics, name: str, aggregation: [Callable[[Iterable[bool]], bool]]):
         value_str = '\n'.join(list(map(str, metrics)))
         super(BaseAggregatedSolutionQualityInfo, self).__init__(name, value_str)
 
@@ -41,7 +41,7 @@ class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
 
 
 class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo, BaseAggregatedSolutionQualityInfo):
-    def __init__(self, *metrics, name: str, aggregation: Callable[[Iterable[float]], float]):
+    def __init__(self, metrics, name: str, aggregation: Callable[[Iterable[float]], float]):
         # may remain unused
         def value_str(metr):
             return '\n'.join(list(map(str, metr)))
