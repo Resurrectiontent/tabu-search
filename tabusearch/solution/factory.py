@@ -16,8 +16,9 @@ class SolutionFactory(Generic[TData]):
     # TODO: abstract *metrics creation to utility functions
     #  consider partial for BaseSolutionQualityInfo-inherited ctors
     def __init__(self, *metrics: Callable[[list[TData]], list[BaseSolutionQualityInfo]],
-                 metrics_aggregation: Optional[Callable[[Iterable[BaseSolutionQualityInfo]],
-                                                        BaseAggregatedSolutionQualityInfo]] = None):
+                 metrics_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
+                                               Iterable[BaseAggregatedSolutionQualityInfo]]
+                                      | None = None):
         self._quality_factory = SolutionQualityFactory(*metrics,
                                                        metrics_aggregation=metrics_aggregation)
 

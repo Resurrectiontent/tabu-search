@@ -50,7 +50,8 @@ class TabuSearch(ABC, Generic[TData]):
                  convergence_criterion: ConvergenceCriterion | int = 100,
                  tabu_time: Callable[[Solution[TData]], int] | int = 5,
                  selection: Callable[[], int] | None = None,
-                 metric_aggregation: Callable[[Iterable[BaseSolutionQualityInfo]], BaseAggregatedSolutionQualityInfo]
+                 metric_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
+                                              Iterable[BaseAggregatedSolutionQualityInfo]]
                                      | None = None):
         assert not isinstance(metric, Iterable) or metric_aggregation, \
             'Should provide metrics_aggregation, if passing several items in metric arg.'
