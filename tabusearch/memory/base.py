@@ -8,26 +8,7 @@ from tabusearch.solution.base import Solution
 from tabusearch.solution.id import SolutionId
 
 
-# TODO: introduce mid-term memory
-
 class BaseMemoryCriterion(ABC):
-    @abstractmethod
-    def memorize(self, move: Solution):
-        """
-        Memories selected move to account it in memory criterion logics. Also, makes a "tick".
-        :param move: The selected solution to memorize.
-        """
-
-    @abstractmethod
-    def apply(self, x: Iterable[Solution]) -> Iterable[Solution]:
-        """
-        Somehow processes solutions, i.e., "applies" the MemoryCriterion.
-        :param x: Initial set (collection) of solutions.
-        :return: Processed collection of solutions. Solutions can be modified or filtered.
-        """
-
-
-class BaseFilteringMemoryCriterion(BaseMemoryCriterion, ABC):
     _inverted: bool
 
     def __init__(self):
@@ -64,23 +45,23 @@ class BaseFilteringMemoryCriterion(BaseMemoryCriterion, ABC):
         """
         ...
 
-    def unite(self, other: 'BaseFilteringMemoryCriterion') -> 'BaseFilteringMemoryCriterion':
+    def unite(self, other: 'BaseMemoryCriterion') -> 'BaseMemoryCriterion':
         """
         Represents union of criteria.
         :param other: other criterion
         :return: CumulativeMemoryCriterion, which `.filter()` returns union of sets, filtered by the criteria.
         """
-        return CumulativeFilteringMemoryCriterion(set.union, self, other)
+        return CumulativeMemoryCriterion(set.union, self, other)
 
-    def intersect(self, other: 'BaseFilteringMemoryCriterion') -> 'BaseFilteringMemoryCriterion':
+    def intersect(self, other: 'BaseMemoryCriterion') -> 'BaseMemoryCriterion':
         """
         Represents intersection of criteria.
         :param other: other criterion
         :return: CumulativeMemoryCriterion, which `.filter()` returns intersection of sets, filtered by the criteria.
         """
-        return CumulativeFilteringMemoryCriterion(set.intersection, self, other)
+        return CumulativeMemoryCriterion(set.intersection, self, other)
 
-    def inverted(self) -> 'BaseFilteringMemoryCriterion':
+    def inverted(self) -> 'BaseMemoryCriterion':
         """
         Represents criterion negation.
         :return: Copy of the criterion with inverted filtering.
@@ -90,7 +71,7 @@ class BaseFilteringMemoryCriterion(BaseMemoryCriterion, ABC):
         return result
 
 
-class FilteringMemoryCriterion(BaseFilteringMemoryCriterion, ABC):
+class MemoryCriterion(BaseMemoryCriterion, ABC):
     @abstractmethod
     def _criterion(self, x: Iterable[Solution]) -> Set[SolutionId]:
         """
@@ -119,7 +100,7 @@ class FilteringMemoryCriterion(BaseFilteringMemoryCriterion, ABC):
     def _negate_criterion(self):
         def negated_criterion(criterion):
             @wraps(criterion)
-            def wrapper(_self: FilteringMemoryCriterion, x: Iterable[Solution]) -> Set[SolutionId]:
+            def wrapper(_self: MemoryCriterion, x: Iterable[Solution]) -> Set[SolutionId]:
                 return {el.id for el in x}.difference(criterion(_self, x))
 
             return wrapper
@@ -137,7 +118,7 @@ class FilteringMemoryCriterion(BaseFilteringMemoryCriterion, ABC):
         return good_idx, move_idx
 
 
-class CumulativeFilteringMemoryCriterion(BaseFilteringMemoryCriterion):
+class CumulativeMemoryCriterion(BaseMemoryCriterion):
     """
     Used to accumulate multiple memory criteria
     """
@@ -147,7 +128,7 @@ class CumulativeFilteringMemoryCriterion(BaseFilteringMemoryCriterion):
         super().__init__()
 
         self._operation = operation
-        self._criteria: List[BaseFilteringMemoryCriterion] = list(criteria)
+        self._criteria: List[BaseMemoryCriterion] = list(criteria)
 
     def apply(self, x: Iterable[Solution]) -> Iterable[Solution]:
         x = x if isinstance(x, list) else list(x)

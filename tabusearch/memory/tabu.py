@@ -1,6 +1,6 @@
 from typing import Iterable, Set, Callable, Dict
 
-from tabusearch.memory.base import FilteringMemoryCriterion
+from tabusearch.memory.base import MemoryCriterion
 from tabusearch.solution.base import Solution
 from tabusearch.solution.id import SolutionId
 
@@ -8,7 +8,7 @@ from tabusearch.solution.id import SolutionId
 # TODO: introduce library of tabu time getters and a convenient way to pass them to TabuList ctor
 
 
-class TabuList(FilteringMemoryCriterion):
+class TabuList(MemoryCriterion):
     """
     Represents short-term memory in Tabu Search algorithm (tabu list).
     """
