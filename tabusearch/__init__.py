@@ -9,7 +9,7 @@ from memory import AspirationBoundType
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
 from tabusearch.memory import AspirationCriterion, TabuList
-from tabusearch.memory.base import BaseMemoryCriterion
+from tabusearch.memory.base import BaseFilteringMemoryCriterion
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
@@ -38,7 +38,7 @@ class TabuSearch(ABC, Generic[TData]):
     aspiration: AspirationCriterion
     tabu: TabuList
     solution_selection: SolutionSelection
-    _memory: BaseMemoryCriterion
+    _memory: BaseFilteringMemoryCriterion
 
     _history: list
 
