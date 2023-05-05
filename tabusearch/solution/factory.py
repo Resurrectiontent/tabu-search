@@ -10,6 +10,7 @@ from tabusearch.typing_ import TData
 
 
 class SolutionFactory(Generic[TData]):
+    quality_factory: SolutionQualityFactory
 
     # TODO: abstract *metrics creation to utility functions
     #  consider partial for BaseSolutionQualityInfo-inherited ctors
@@ -17,18 +18,17 @@ class SolutionFactory(Generic[TData]):
                  metrics_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
                                                Iterable[BaseAggregatedSolutionQualityInfo]]
                                       | None = None):
-        self._quality_factory = SolutionQualityFactory(*metrics,
-                                                       metrics_aggregation=metrics_aggregation)
+        self.quality_factory = SolutionQualityFactory(*metrics,
+                                                      metrics_aggregation=metrics_aggregation)
 
-    def __call__(self, generated: list[tuple[str, list[tuple[TData, str]]]],
-                 *pre_evaluated_metrics: list[BaseSolutionQualityInfo]) -> list[Solution[TData]]:
+    def __call__(self, generated: list[tuple[str, list[tuple[TData, str]]]]) -> list[Solution[TData]]:
         solutions: list[tuple[SolutionId, TData]] = list(chain(*[[(SolutionId(generator_name, *name_suffix), position)
                                                                   for position, *name_suffix in solutions]
                                                                  for generator_name, solutions in generated]))
 
-        qualities = self._quality_factory([position for _, position in solutions], *pre_evaluated_metrics)
+        qualities = self.quality_factory([position for _, position in solutions])
         return [Solution(solution_id, position, quality)
                 for (solution_id, position), quality in zip(solutions, qualities)]
 
     def initial(self, position: TData) -> Solution[TData]:
-        return Solution(SolutionId('Init'), position, self._quality_factory.single(position))
+        return Solution(SolutionId('Init'), position, self.quality_factory.single(position))

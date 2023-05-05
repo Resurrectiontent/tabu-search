@@ -5,14 +5,14 @@ import numpy as np
 from numpy.typing import NDArray
 
 from tabusearch.typing_ import TData
-from tabusearch.memory.evaluating.base import BaseEvaluatingMemoryCriterion
+from tabusearch.memory.evaluating.base import SecondOrderEvaluatingMemoryCriterion
 from tabusearch.solution.base import Solution
 from tabusearch.solution.quality.base import BaseSolutionQualityInfo
 from tabusearch.solution.quality.single import SolutionQualityInfo
 
 
 # TODO: implement option to calculate gradient for 3 historical points and compare it with direction of the new point
-class GradientAccelerator(BaseEvaluatingMemoryCriterion[TData, NDArray]):
+class GradientAccelerator(SecondOrderEvaluatingMemoryCriterion[TData, NDArray]):
     _history_points: deque[NDArray]
     _history_values: deque[float]
     _allow_2p_grad: bool
@@ -29,25 +29,28 @@ class GradientAccelerator(BaseEvaluatingMemoryCriterion[TData, NDArray]):
     def memorize(self, move: Solution):
         [position] = self.convert_to_evaluated_data_type([move.position])
 
-        assert isinstance(position, np.ndrray)
-        assert isinstance(move.quality, SolutionQualityInfo)
+        if not isinstance(position, np.ndrray):
+            raise Exception(f'Converted data was not ndarray. It was {type(position)}')
+        if not isinstance(move.quality, SolutionQualityInfo):
+            raise Exception('Quality of solution should be SolutionQualityInfo descendant'
+                            ' to use in GradientAccelerator.')
 
         self._history_points.append(position)
         self._history_values.append(move.quality.value)
 
-    def evaluate(self, x: Iterable[tuple[Solution, NDArray]]) -> Iterable[BaseSolutionQualityInfo]:
+    def evaluate(self, x: Iterable[tuple[NDArray, SolutionQualityInfo]]) -> Iterable[BaseSolutionQualityInfo]:
         match self._allow_2p_grad, len(self._history_points):
             case True, 1:
-                weights = [sum(pseudogradient_2p(self._history_points[0], v,
-                                                          self._history_values[0], s.quality.value)) for s, v in x]
+                weights = [sum(pseudogradient_2p(self._history_points[0], d,
+                                                          self._history_values[0], q)) for d, q in x]
             case _, 2:
-                weights = [sum(pseudogradient(list(self._history_points) + [v],
-                                                       list(self._history_values) + [s.quality.value])) for s, v in x]
+                weights = [sum(pseudogradient(list(self._history_points) + [d],
+                                                       list(self._history_values) + [q])) for d, q in x]
             case _:
                 weights = [1 for _ in x]
 
-        return [s.quality.quality_like(data=s.position, name='GradientAccelerator', float_=w, value_str=str)
-                for (s, _), w in zip(x, weights)]
+        return [q.quality_like(data=d, name='GradientAccelerator', float_=w, value_str=str)
+                for (d, q), w in zip(x, weights)]
 
 
 def pseudogradient_2p(point1: NDArray, point2: NDArray, val1: float, val2: float):

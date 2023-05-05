@@ -38,7 +38,6 @@ class TabuSearch(ABC, Generic[TData]):
 
     _filtering_memory: BaseFilteringMemoryCriterion
     _evaluating_memory: list[BaseEvaluatingMemoryCriterion]
-    _reevaluated_solutions_factory: SolutionFactory[TData]
 
     _history: list
 
@@ -79,11 +78,12 @@ class TabuSearch(ABC, Generic[TData]):
                                 'and the rest from 1 will be given as weight for first order metrics.')
             self._evaluating_memory = additional_evaluation
             # noinspection PyTypeChecker
-            self._reevaluated_solutions_factory = \
-                SolutionFactory(*additional_evaluation, complex_metric(
-                    normalized_weighted_metrics_aggregation('Add eval agg',
-                                                            [1-sum(additional_evaluation_weights),
-                                                             *additional_evaluation_weights])))
+            self.solution_factory.quality_factory.add_evaluation_layer(*additional_evaluation,
+                                                                       metrics_aggregation=complex_metric(
+                                                                           normalized_weighted_metrics_aggregation(
+                                                                               'Add eval agg',
+                                                                               [1-sum(additional_evaluation_weights),
+                                                                                *additional_evaluation_weights])))
 
         self.aspiration = AspirationCriterion(AspirationBoundType.GreaterEquals)
         self.tabu = TabuList(tabu_time)
@@ -119,7 +119,6 @@ class TabuSearch(ABC, Generic[TData]):
         return self.hall_of_fame[-1]
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
-        # TODO: add additional evaluation accounting
         generated = [(behaviour.mutation_type, behaviour.mutate(x)) for behaviour in self.mutation_behaviour]
         solutions = self.solution_factory(generated)
         return self.filtering_memory_criterion.filter(solutions)
