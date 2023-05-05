@@ -119,6 +119,7 @@ class TabuSearch(ABC, Generic[TData]):
         return self.hall_of_fame[-1]
 
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
+        # TODO: add additional evaluation accounting
         generated = [(behaviour.mutation_type, behaviour.mutate(x)) for behaviour in self.mutation_behaviour]
         solutions = self.solution_factory(generated)
         return self.filtering_memory_criterion.filter(solutions)
