@@ -20,6 +20,13 @@ class SolutionQualityInfo(BaseSolutionQualityInfo, Generic[TData]):
         self._float_f, self._float_n = (partial(float_, data), NAN) if callable(float_) else (None, float_)
         self._minimized = minimized
 
+    def quality_like(self, **kwargs):
+        return SolutionQualityInfo(**dict(dict(data=self._data,
+                                               name=self.name,
+                                               float_=self._float,
+                                               minimized=self._minimized,
+                                               value_str=self._str), **kwargs))
+
     @property
     def value(self):
         """

@@ -1,6 +1,6 @@
 from typing import Iterable, Set, Callable, Dict
 
-from tabusearch.memory.base import FilteringMemoryCriterion
+from tabusearch.memory.filtering.base import FilteringMemoryCriterion
 from tabusearch.solution.base import Solution
 from tabusearch.solution.id import SolutionId
 

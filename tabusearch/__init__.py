@@ -1,15 +1,13 @@
 from abc import ABC
 from copy import copy
-from itertools import chain
 from operator import attrgetter
 from sortedcontainers import SortedList
 from typing import Iterable, Callable, Generic
 
-from memory import AspirationBoundType
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
-from tabusearch.memory import AspirationCriterion, TabuList
-from tabusearch.memory.base import BaseFilteringMemoryCriterion
+from tabusearch.memory import AspirationCriterion, AspirationBoundType, TabuList
+from tabusearch.memory.filtering.base import BaseFilteringMemoryCriterion
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
@@ -38,7 +36,7 @@ class TabuSearch(ABC, Generic[TData]):
     aspiration: AspirationCriterion
     tabu: TabuList
     solution_selection: SolutionSelection
-    _memory: BaseFilteringMemoryCriterion
+    _filtering_memory: BaseFilteringMemoryCriterion
 
     _history: list
 
@@ -73,10 +71,10 @@ class TabuSearch(ABC, Generic[TData]):
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))
 
     @property
-    def resulting_memory_criterion(self):
-        if not hasattr(self, '_memory') or self._memory is None:
-            self._memory = self.tabu.unite(self.aspiration)
-        return self._memory
+    def filtering_memory_criterion(self):
+        if not hasattr(self, '_filtering_memory') or self._filtering_memory is None:
+            self._filtering_memory = self.tabu.unite(self.aspiration)
+        return self._filtering_memory
 
     def optimize(self, x0: TData) -> Solution[TData]:
         # TODO: move to memorize_move
@@ -104,14 +102,14 @@ class TabuSearch(ABC, Generic[TData]):
     def get_neighbours(self, x: Solution) -> Iterable[Solution]:
         generated = [(behaviour.mutation_type, behaviour.mutate(x)) for behaviour in self.mutation_behaviour]
         solutions = self.solution_factory(generated)
-        return self.resulting_memory_criterion.apply(solutions)
+        return self.filtering_memory_criterion.filter(solutions)
 
     def choose(self, neighbours: Iterable[Solution]) -> Solution:
         neighbours = SortedList(neighbours, key=attrgetter('quality'))
         return self.solution_selection(neighbours) if neighbours else None
 
     def memorize_move(self, move: Solution):
-        self._memory.memorize(move)
+        self._filtering_memory.memorize(move)
         self.hall_of_fame.add(move)
 
         if len(self.hall_of_fame) > self.hall_of_fame_size:
