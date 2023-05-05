@@ -20,19 +20,27 @@ class SolutionQualityFactory(Generic[TData]):
                                                Iterable[BaseAggregatedSolutionQualityInfo]]
                                       | None = None):
         match metrics, metrics_aggregation:
+            # one metric and no aggregation
             case [_], None:
                 self._is_aggregated = False
-            case [_, _, *_], _:
+            # one or more metrics and not-None aggregation
+            case [_, *_], _ if metrics_aggregation:
                 self._is_aggregated = True
-            case _, _:
+            case _:
                 raise Exception('SolutionQualityFactory should be initialised either with one metric '
                                 'or with several metrics and an aggregation.')
 
         self._metrics = list(metrics)
         self._metrics_aggregation = metrics_aggregation
 
-    def __call__(self, x: list[TData]) -> Iterable[BaseSolutionQualityInfo]:
-        return self._apply_aggregation(x) if self._is_aggregated else self._apply_single_metric(x)
+    def __call__(self, x: list[TData], *pre_evaluated_metrics: Iterable[BaseSolutionQualityInfo]) \
+            -> Iterable[BaseSolutionQualityInfo]:
+        if pre_evaluated_metrics and not self._is_aggregated:
+            raise Exception('Cannot add pre-evaluated metrics to a non-aggregating solution quality factory.')
+
+        return self._apply_aggregation(x, *pre_evaluated_metrics) \
+            if self._is_aggregated \
+            else self._apply_single_metric(x)
 
     def single(self, x: TData) -> BaseSolutionQualityInfo:
         """
@@ -81,19 +89,30 @@ class SolutionQualityFactory(Generic[TData]):
         """
         if not self._is_aggregated:
             raise Exception('Cannot wrap an non-aggregating solution quality factory. Use `aggregate` method instead.')
-        self._metrics = [partial(self._apply_aggregation_static, self._metrics, self._metrics_aggregation),
+        self._metrics = [partial(self._apply_aggregation_static,
+                                 metrics=self._metrics,
+                                 metrics_aggregation=self._metrics_aggregation),
                          *metrics]
         self._metrics_aggregation = metrics_aggregation
 
-    def _apply_aggregation(self, x: list[TData]) -> Iterable[BaseSolutionQualityInfo]:
-        return self._apply_aggregation_static(x, self._metrics, self._metrics_aggregation)
+    def _apply_aggregation(self, x: list[TData], *pre_evaluated_metrics: list[BaseSolutionQualityInfo]) \
+            -> Iterable[BaseSolutionQualityInfo]:
+        return self._apply_aggregation_static(x, self._metrics, self._metrics_aggregation, *pre_evaluated_metrics)
 
     @staticmethod
     def _apply_aggregation_static(x: list[TData],
                                   metrics: Iterable[Callable[[list[TData]], list[BaseSolutionQualityInfo]]],
                                   metrics_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
-                                                                Iterable[BaseAggregatedSolutionQualityInfo]]):
-        return metrics_aggregation(zip(*[m(x) for m in metrics]))
+                                                                Iterable[BaseAggregatedSolutionQualityInfo]],
+                                  *pre_evaluated_metrics: list[BaseSolutionQualityInfo]):
+        evaluated_metrics = zip(*[m(x) for m in metrics])
+
+        if pre_evaluated_metrics:
+            all_metrics = list(pre_evaluated_metrics)
+            all_metrics.extend(evaluated_metrics)
+            return metrics_aggregation(all_metrics)
+
+        return metrics_aggregation(evaluated_metrics)
 
     def _apply_single_metric(self, x: list[TData]) -> Iterable[BaseSolutionQualityInfo]:
         [metric] = self._metrics

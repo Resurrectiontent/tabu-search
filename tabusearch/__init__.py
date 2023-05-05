@@ -4,10 +4,13 @@ from operator import attrgetter
 from sortedcontainers import SortedList
 from typing import Iterable, Callable, Generic
 
+from solution.quality.lib.aggregated import normalized_weighted_metrics_aggregation
+from solution.quality.lib.complex import complex_metric
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
 from tabusearch.memory import AspirationCriterion, AspirationBoundType, TabuList
 from tabusearch.memory.filtering.base import BaseFilteringMemoryCriterion
+from tabusearch.memory.evaluating.base import BaseEvaluatingMemoryCriterion
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.base import Solution
 from tabusearch.solution.factory import SolutionFactory
@@ -36,7 +39,10 @@ class TabuSearch(ABC, Generic[TData]):
     aspiration: AspirationCriterion
     tabu: TabuList
     solution_selection: SolutionSelection
+
     _filtering_memory: BaseFilteringMemoryCriterion
+    _evaluating_memory: list[BaseEvaluatingMemoryCriterion]
+    _reevaluated_solutions_factory: SolutionFactory[TData]
 
     _history: list
 
@@ -50,7 +56,9 @@ class TabuSearch(ABC, Generic[TData]):
                  selection: Callable[[], int] | None = None,
                  metric_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
                                               Iterable[BaseAggregatedSolutionQualityInfo]]
-                                     | None = None):
+                                     | None = None,
+                 additional_evaluation: list[BaseEvaluatingMemoryCriterion] | None = None,
+                 additional_evaluation_weights: list[float] | None = None):
         assert not isinstance(metric, Iterable) or metric_aggregation, \
             'Should provide metrics_aggregation, if passing several items in metric arg.'
 
@@ -64,8 +72,23 @@ class TabuSearch(ABC, Generic[TData]):
         self.mutation_behaviour = mutation_behaviour \
             if isinstance(mutation_behaviour, Iterable) \
             else [mutation_behaviour]
-        self.solution_factory = SolutionFactory((*metric,) if isinstance(metric, Iterable) else metric,
+        self.solution_factory = SolutionFactory(*metric if isinstance(metric, Iterable) else metric,
                                                 metrics_aggregation=metric_aggregation)
+        if additional_evaluation:
+            if not additional_evaluation_weights \
+                    or len(additional_evaluation) != len(additional_evaluation_weights) \
+                    or sum(additional_evaluation_weights) >= 1:
+                raise Exception('Should provide weights for additional evaluations '
+                                'so, that their sum will be less then 1, '
+                                'and the rest from 1 will be given as weight for first order metrics.')
+            self._evaluating_memory = additional_evaluation
+            # noinspection PyTypeChecker
+            self._reevaluated_solutions_factory = \
+                SolutionFactory(*additional_evaluation, complex_metric(
+                    normalized_weighted_metrics_aggregation('Add eval agg',
+                                                            [1-sum(additional_evaluation_weights),
+                                                             *additional_evaluation_weights])))
+
         self.aspiration = AspirationCriterion(AspirationBoundType.GreaterEquals)
         self.tabu = TabuList(tabu_time)
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))

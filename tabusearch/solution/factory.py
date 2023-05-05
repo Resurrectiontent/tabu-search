@@ -1,7 +1,5 @@
-from copy import copy
-from functools import partial
 from itertools import chain
-from typing import Callable, Iterable, Optional, Generic
+from typing import Callable, Iterable, Generic
 
 from tabusearch.solution.base import Solution
 from tabusearch.solution.id import SolutionId
@@ -22,12 +20,13 @@ class SolutionFactory(Generic[TData]):
         self._quality_factory = SolutionQualityFactory(*metrics,
                                                        metrics_aggregation=metrics_aggregation)
 
-    def __call__(self, generated: list[tuple[str, list[tuple[TData, str]]]]) -> list[Solution[TData]]:
+    def __call__(self, generated: list[tuple[str, list[tuple[TData, str]]]],
+                 *pre_evaluated_metrics: list[BaseSolutionQualityInfo]) -> list[Solution[TData]]:
         solutions: list[tuple[SolutionId, TData]] = list(chain(*[[(SolutionId(generator_name, *name_suffix), position)
                                                                   for position, *name_suffix in solutions]
                                                                  for generator_name, solutions in generated]))
 
-        qualities = self._quality_factory([position for _, position in solutions])
+        qualities = self._quality_factory([position for _, position in solutions], *pre_evaluated_metrics)
         return [Solution(solution_id, position, quality)
                 for (solution_id, position), quality in zip(solutions, qualities)]
 
