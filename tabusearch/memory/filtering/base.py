@@ -6,7 +6,7 @@ from typing import Iterable, Set, Tuple, List, Callable
 
 from memory.base import BaseMemoryCriterion
 from solution.id import SolutionId
-from tabusearch import Solution
+from tabusearch.solution.base import Solution
 
 
 class BaseFilteringMemoryCriterion(BaseMemoryCriterion, ABC):

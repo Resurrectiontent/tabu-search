@@ -68,9 +68,9 @@ class SolutionQualityFactory(Generic[TData]):
         if pre_evaluated_metric:
             # TODO: consider replacing list(zip(x, pre_evaluated_metric)) on just zip(x, pre_evaluated_metric)
             # first - pre-evaluated metric, then - other metrics with passing pre-evaluated value
+            layer_metrics = [m(list(zip(x, pre_evaluated_metric))) for m in metrics]
             # zip(*...) - for recombination of metric[solution] on solution[metric]
-            evaluated_metrics = zip(*([pre_evaluated_metric]
-                                      + [m(list(zip(x, pre_evaluated_metric))) for m in metrics]))
+            evaluated_metrics = zip(*[pre_evaluated_metric, *layer_metrics])
         else:
             evaluated_metrics = zip(*[m(x) for m in metrics])
 

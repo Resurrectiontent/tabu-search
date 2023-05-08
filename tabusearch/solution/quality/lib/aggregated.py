@@ -32,23 +32,29 @@ def sum_metrics_aggregation(name: str, weights: list[Number] | None = None) \
 
 
 def normalized_weighted_metrics_aggregation(name: str, weights: list[Number]) \
-        -> Callable[[Iterable[Iterable[SolutionQualityInfo]]], list[BaseAggregatedSolutionQualityInfo]]:
+        -> Callable[[list[Iterable[SolutionQualityInfo]]], list[BaseAggregatedSolutionQualityInfo]]:
     # per-metrics matrix normalization
-    def get_weights(solutions_metrics: Iterable[Iterable[SolutionQualityInfo]]) -> list[list[float]]:
+    def get_weights(solutions_metrics: list[Iterable[SolutionQualityInfo]]) -> list[list[float]]:
         matrix = np.array([[float(metric_value) for metric_value in solution_metrics]
                            for solution_metrics in solutions_metrics])
+        if matrix.shape[0] == 1:
+            return (1 / matrix).tolist()
         normalized = (matrix - matrix.min(axis=0)) / matrix.ptp(axis=0)
+        normalized = np.nan_to_num(normalized)
         norm_weighted = normalized * weights
-        output_weights = (norm_weighted / matrix).tolist()
-        return output_weights
+        output_weights = norm_weighted / matrix
+        output_weights_list = np.nan_to_num(output_weights).tolist()
+        return output_weights_list
 
     def aggregation(solution_metrics: Iterable[float], output_weights: list[float]) -> float:
         return sum(map(mul, solution_metrics, output_weights))
 
     one_solution_metrics = partial(CompareAggregatedSolutionQualityInfo, name=name)
 
-    def iter_solutions(solutions_metrics: Iterable[Iterable[SolutionQualityInfo]]) \
+    def iter_solutions(solutions_metrics: list[Iterable[SolutionQualityInfo]]) \
             -> list[CompareAggregatedSolutionQualityInfo]:
+        if not isinstance(solutions_metrics, list):
+            solutions_metrics = list(solutions_metrics)
         output_weights = get_weights(solutions_metrics)
         return [one_solution_metrics(mtrx, aggregation=partial(aggregation, output_weights=wghts))
                 for mtrx, wghts in zip(solutions_metrics, output_weights)]

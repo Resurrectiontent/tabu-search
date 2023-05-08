@@ -7,8 +7,9 @@ from sortedcontainers import SortedList
 
 from tabusearch.convergence import IterativeConvergence
 from tabusearch.convergence.base import ConvergenceCriterion
-from tabusearch.memory import AspirationCriterion, AspirationBoundType, TabuList
 from tabusearch.memory.filtering.base import BaseFilteringMemoryCriterion
+from tabusearch.memory.filtering.aspiration import AspirationCriterion, AspirationBoundType
+from tabusearch.memory.filtering.tabu import TabuList
 from tabusearch.memory.evaluating.base import BaseEvaluatingMemoryCriterion
 from tabusearch.mutation.base import MutationBehaviour
 from tabusearch.solution.base import Solution

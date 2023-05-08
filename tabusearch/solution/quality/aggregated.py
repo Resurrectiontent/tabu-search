@@ -2,6 +2,7 @@ from abc import ABC
 from functools import partialmethod
 from operator import eq, lt
 from typing import Callable, Iterable
+import math
 
 import numpy as np
 from numpy.typing import NDArray

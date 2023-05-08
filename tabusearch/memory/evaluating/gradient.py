@@ -29,7 +29,7 @@ class GradientAccelerator(SecondOrderEvaluatingMemoryCriterion[TData, NDArray]):
     def memorize(self, move: Solution):
         [position] = self.convert_to_evaluated_data_type([move.position])
 
-        if not isinstance(position, np.ndrray):
+        if not isinstance(position, np.ndarray):
             raise Exception(f'Converted data was not ndarray. It was {type(position)}')
         if not isinstance(move.quality, SolutionQualityInfo):
             raise Exception('Quality of solution should be SolutionQualityInfo descendant'
@@ -41,16 +41,20 @@ class GradientAccelerator(SecondOrderEvaluatingMemoryCriterion[TData, NDArray]):
     def evaluate(self, x: Iterable[tuple[NDArray, SolutionQualityInfo]]) -> Iterable[BaseSolutionQualityInfo]:
         match self._allow_2p_grad, len(self._history_points):
             case True, 1:
-                weights = [sum(pseudogradient_2p(self._history_points[0], d,
-                                                          self._history_values[0], q)) for d, q in x]
+                def evaluator(data, quality):
+                    return pseudogradient_2p(self._history_points[0], data,
+                                             self._history_values[0], quality.value).sum()
             case _, 2:
-                weights = [sum(pseudogradient(list(self._history_points) + [d],
-                                                       list(self._history_values) + [q])) for d, q in x]
+                def evaluator(data, quality):
+                    return pseudogradient(list(self._history_points) + [data],
+                                          list(self._history_values) + [quality.value]).sum()
             case _:
-                weights = [1 for _ in x]
+                def evaluator(*args):
+                    return 1
 
-        return [q.quality_like(data=d, name='GradientAccelerator', float_=w, value_str=str)
-                for (d, q), w in zip(x, weights)]
+        result = [q.quality_like(data=d, name='GradientAccelerator', float_=evaluator(d, q), value_str=str)
+                  for d, q in x]
+        return result
 
 
 def pseudogradient_2p(point1: NDArray, point2: NDArray, val1: float, val2: float):
@@ -92,7 +96,7 @@ def pseudogradient(points: list[NDArray], values: list[float]):
 
     # If the angle is zero or 180 degrees, return the zero vector
     if cos_theta == 1.0 or cos_theta == -1.0:
-        return np.zeros_like(points[0]), np.array([0])
+        return np.zeros_like(points[0]) * np.array([0])
 
     # Calculate the sine of the angle between the two differences
     sin_theta = np.sqrt(1.0 - cos_theta ** 2)

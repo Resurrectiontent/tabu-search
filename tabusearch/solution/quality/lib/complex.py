@@ -35,7 +35,10 @@ def complex_metric(aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityI
     """
     def generate_complex_metric(metrics: list[list[BaseSolutionQualityInfo]]) \
             -> list[ComplexSolutionQualityInfo]:
+        if not isinstance(metrics, list):
+            metrics = list(metrics)
         aggregated_metric = aggregation(metrics)
-        return [ComplexSolutionQualityInfo(main, full) for [main, *_], full in zip(metrics, aggregated_metric)]
+        i_ = list(zip(metrics, aggregated_metric))
+        return [ComplexSolutionQualityInfo(main, full) for [main, *_], full in i_]
 
     return generate_complex_metric
