@@ -49,12 +49,14 @@ class TabuSearch(ABC, Generic[TData]):
                  hall_of_fame_size: int = 5,
                  convergence_criterion: ConvergenceCriterion | int = 100,
                  tabu_time: Callable[[Solution[TData]], int] | int = 5,
+                 aspiration_bound_type: AspirationBoundType = AspirationBoundType.Greater,
                  selection: Callable[[], int] | None = None,
                  metric_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
                                               Iterable[BaseAggregatedSolutionQualityInfo]]
                                      | None = None,
                  additional_evaluation: list[BaseEvaluatingMemoryCriterion] | None = None,
-                 additional_evaluation_weights: list[float] | None = None):
+                 additional_evaluation_weights: list[float] | None = None,
+                 use_simple_solution_ids: bool = False):
         assert not isinstance(metric, Iterable) or metric_aggregation, \
             'Should provide metrics_aggregation, if passing several items in metric arg.'
 
@@ -68,8 +70,11 @@ class TabuSearch(ABC, Generic[TData]):
         self.mutation_behaviour = mutation_behaviour \
             if isinstance(mutation_behaviour, Iterable) \
             else [mutation_behaviour]
-        self.solution_factory = SolutionFactory(*metric if isinstance(metric, Iterable) else metric,
-                                                metrics_aggregation=metric_aggregation)
+        if not isinstance(metric, Iterable):
+            metric = (metric,)
+        self.solution_factory = SolutionFactory(*metric,
+                                                metrics_aggregation=metric_aggregation,
+                                                use_simple_ids=use_simple_solution_ids)
         if additional_evaluation:
             if not additional_evaluation_weights \
                     or len(additional_evaluation) != len(additional_evaluation_weights) \
@@ -86,7 +91,7 @@ class TabuSearch(ABC, Generic[TData]):
                                                                                [1-sum(additional_evaluation_weights),
                                                                                 *additional_evaluation_weights])))
 
-        self.aspiration = AspirationCriterion(AspirationBoundType.GreaterEquals)
+        self.aspiration = AspirationCriterion(aspiration_bound_type)
         self.tabu = TabuList(tabu_time)
         self.solution_selection = SolutionSelection(selection or (lambda _: 0))
 

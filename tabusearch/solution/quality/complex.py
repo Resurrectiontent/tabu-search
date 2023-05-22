@@ -26,9 +26,8 @@ class ComplexSolutionQualityInfo(SolutionQualityInfo):
         """
         return self.main.value
 
-    @property
-    def _float(self):
-        return self.main._float
+    def __float__(self):
+        return float(self.main)
 
     def _equals_to(self, other: 'ComplexSolutionQualityInfo') -> bool:
         return self.full == other.full

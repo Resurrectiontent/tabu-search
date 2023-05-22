@@ -76,9 +76,11 @@ def order_shuffle(ind: ChromosomeType,
 
     for i in range(attempts):
         shuffled = copy_chromosome(ind)
-        rng.shuffle(shuffled[0])
+        shuffled_idx = np.arange(shuffled[0].size)
+        rng.shuffle(shuffled_idx)
+        shuffled[0][np.arange(shuffled[0].size)] = shuffled[0][shuffled_idx]
         if is_order_correct(shuffled):
-            result.append((shuffled, ''))
+            result.append((shuffled, [str(i) for i in shuffled_idx]))
 
     return result
 

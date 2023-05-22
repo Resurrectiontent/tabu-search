@@ -184,7 +184,7 @@ def check_increased_resources(res: NDArray, contractor_borders: NDArray, res_up_
     # return True
 
     # all assigned contractor's resources are in contractor's limits
-    return all((res[:-1, np.where(res[-1] == ct_id)[0]].max(axis=1) <= ct_border).all()
+    return all((res[:-1, np.where(res[-1] == ct_id)[0]].max(axis=1, initial=0) <= ct_border).all()
                for ct_id, ct_border in enumerate(contractor_borders))
 
 

@@ -265,14 +265,9 @@ def init_order_optimiser(opt_preset, setup_toolbox):
         metric=custom_metric('time-res', setup_toolbox.evaluate_time_res, minimized=True))
 
 
-def test_scheduler_comparison(setup_schedule_genetic, setup_schedule_heft,
-                                setup_toolbox, setup_base_optimisers, setup_wg):
+def test_scheduler_comparison(setup_schedule_genetic, setup_toolbox, setup_base_optimisers, setup_wg):
     t0 = time()
 
-    topological_schedule: ChromosomeType = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule_genetic)
-    topological_quality = setup_toolbox.evaluate_time_res(topological_schedule)
-    heft_schedule: ChromosomeType = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule_genetic)
-    heft_quality = setup_toolbox.evaluate_time_res(heft_schedule)
     genetic_schedule: ChromosomeType = setup_toolbox.schedule_to_chromosome(schedule=setup_schedule_genetic)
     genetic_quality = setup_toolbox.evaluate_time_res(genetic_schedule)
 
@@ -291,8 +286,6 @@ def test_scheduler_comparison(setup_schedule_genetic, setup_schedule_heft,
     data = {'works': genetic_schedule[0].size,
             'wg_name': wg_name,
             'move_selection': move_selection,
-            'topo': topological_quality,
-            'heft': heft_quality,
             'genetic': genetic_quality,
             'tabu': s_ord.quality.value,
             't': [t0, t1, t2, t3]}
@@ -314,8 +307,8 @@ def test_scheduler_comparison(setup_schedule_genetic, setup_schedule_heft,
 
     dpi = 150
     fig, ax = plt.subplots(figsize=(1024 / dpi, 768 / dpi), dpi=dpi)
-    ax.plot([-2], [topological_quality], 'co')
-    ax.plot([-1], [heft_quality], 'mo')
+    # ax.plot([-2], [topological_quality], 'co')
+    # ax.plot([-1], [heft_quality], 'mo')
     ax.plot([0], [h_res[0]], 'ro')
     ax.plot(np.arange(len(h_res)), h_res, 'b-', linewidth=2)
     ax.plot(np.arange(len(h_res) - 1, len(h_res) + len(h_ord) - 1), h_ord, 'g-', linewidth=2)

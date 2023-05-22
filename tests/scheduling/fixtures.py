@@ -1,7 +1,8 @@
+import os
 from collections import defaultdict
 from functools import partial
 
-from sampo.generator import ContractorGenerationMethod
+# from sampo.generator import ContractorGenerationMethod
 from scipy.stats import expon, norm
 from typing import Callable
 
@@ -24,6 +25,11 @@ from sampo.schemas.schedule_spec import ScheduleSpec
 from sampo.schemas.time_estimator import WorkTimeEstimator
 from sampo.utilities.collections import reverse_dictionary
 from tabusearch import TabuSearch
+
+storage = 'scheduling/resources/'
+
+if os.path.exists('/tabu-trialing'):
+    storage = os.path.join('/tabu-trialing/tabu-search/tests/', storage)
 
 
 @pytest.fixture(scope='session', params=[#('static', None, lambda x: lambda _: x),
@@ -61,21 +67,25 @@ def setup_base_optimisers(request, setup_wg):
 
 
 @pytest.fixture(scope='session', params=[#('wg-50', 50, 25, 15),
-                                         ('wg-100', 100, 35, 17),
-                                         ('wg-150', 150, 40, 20),
-                                         ('wg-225', 225, 50, 30),
-                                         ('wg-300', 300, 60, 40),
-                                         ('wg-400', 400, 70, 50)
+                                         # ('wg-100', 100, 35, 17),
+                                         # ('wg-150', 150, 40, 20),
+                                         # ('wg-225', 225, 50, 30),
+                                         # ('wg-300', 300, 60, 40),
+                                         # ('wg-400', 400, 70, 50)
                                          #('small', 80, 30, 17),
                                          #('medium', 150, 40, 20),
                                          #('large', 250, 60, 40),
                                          #('real-0', 'wg_0'),
-                                         #('real-1', 'wg_1')
+                                         #('real-1', 'wg_1'),
+                                         ('real-1002', 'wg_1002'),
+                                         # ('real-2037', 'wg_2037'),
+                                         # ('real-5085', 'wg_5085'),
+                                         # ('real-10081', 'wg_10081'),
                                         ])
 def setup_wg(request):
     name, *params = request.param
     if 'real' in name:
-        wg = WorkGraph.load(f'scheduling/resources/{params[0]}', 'work_graph')
+        wg = WorkGraph.load(os.path.join(storage, params[0]), 'work_graph')
     else:
         wg = generator.SimpleSynthetic().advanced_work_graph(*params)
     return name, wg
@@ -83,11 +93,11 @@ def setup_wg(request):
 
 @pytest.fixture(scope='session')
 def setup_contractors(setup_wg):
-    # if 'real' in setup_wg[0]:
-    #     contractors = [Contractor.load(f'scheduling/resources/wg_{setup_wg[0].split("-")[-1]}', f'contractor_{i}')
-    #                    for i in range(2)]
-    # else:
-    contractors = [generator.get_contractor_by_wg(setup_wg[1])]
+    if 'real' in setup_wg[0]:
+        contractors = [Contractor.load(os.path.join(storage, f'wg_{setup_wg[0].split("-")[-1]}'), f'contractor_{i}')
+                       for i in range(2)]
+    else:
+        contractors = [generator.get_contractor_by_wg(setup_wg[1])]
     return contractors
 
 

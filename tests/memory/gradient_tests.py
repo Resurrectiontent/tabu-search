@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from numpy import random as np_rnd
 from sortedcontainers import SortedList
 
-from tests.function_optimisation.functions import rosenbrock, styblinski_tang
+from tests.function_optimisation.functions import rosenbrock, styblinski_tang, michalewicz
 from tabusearch.solution.quality.lib.aggregated import normalized_weighted_metrics_aggregation
 from tabusearch.solution.quality.lib.complex import complex_metric
 from tabusearch.solution.factory import SolutionFactory
@@ -47,14 +47,14 @@ def test_gradient_no_gradient_comparison():
 
     ga = GradientAccelerator()
 
-    function = styblinski_tang
-    x0 = np_rnd.randint(-10, 10, 10, int)
+    function = michalewicz
+    x0 = np_rnd.randint(0, 3, 10, int)
     mutations: list[MutationBehaviour] = [NearestNeighboursMutation(), FullAxisShiftMutation()]
     metric = custom_metric(function.__name__, function, minimized=True)
     solution_factory = SolutionFactory(metric)
     # noinspection PyTypeChecker
     solution_factory.quality_factory.add_evaluation_layer(ga, metrics_aggregation=complex_metric(
-                    normalized_weighted_metrics_aggregation('Add eval agg', [0.8, 0.2])))
+                    normalized_weighted_metrics_aggregation('Add eval agg', [0.5, 0.5])))
     solution_factory_no_grad = SolutionFactory(metric)
 
     def opt(factory, grad_accel=None):

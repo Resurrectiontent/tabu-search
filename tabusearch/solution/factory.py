@@ -17,12 +17,14 @@ class SolutionFactory(Generic[TData]):
     def __init__(self, *metrics: Callable[[list[TData]], list[BaseSolutionQualityInfo]],
                  metrics_aggregation: Callable[[Iterable[Iterable[BaseSolutionQualityInfo]]],
                                                Iterable[BaseAggregatedSolutionQualityInfo]]
-                                      | None = None):
+                                      | None = None,
+                 use_simple_ids: bool = False):
         self.quality_factory = SolutionQualityFactory(*metrics,
                                                       metrics_aggregation=metrics_aggregation)
+        self._use_simple_ids = use_simple_ids
 
     def __call__(self, generated: list[tuple[str, list[tuple[TData, str]]]]) -> list[Solution[TData]]:
-        solutions: list[tuple[SolutionId, TData]] = list(chain(*[[(SolutionId(generator_name, *name_suffix), position)
+        solutions: list[tuple[SolutionId, TData]] = list(chain(*[[(self._id_factory(generator_name, *name_suffix), position)
                                                                   for position, *name_suffix in solutions]
                                                                  for generator_name, solutions in generated]))
 
@@ -32,3 +34,6 @@ class SolutionFactory(Generic[TData]):
 
     def initial(self, position: TData) -> Solution[TData]:
         return Solution(SolutionId('Init'), position, self.quality_factory.single(position))
+
+    def _id_factory(self, generator_name: str, *solution_suffix: str):
+        return SolutionId(generator_name) if self._use_simple_ids else SolutionId(generator_name, *solution_suffix)

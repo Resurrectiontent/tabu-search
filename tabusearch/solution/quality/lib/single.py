@@ -1,4 +1,5 @@
 from functools import partial
+from multiprocessing.pool import ThreadPool
 from numbers import Number
 from typing import Iterable, Callable
 
@@ -29,6 +30,17 @@ def custom_metric(name: str, evaluation: Callable[[TData], float], **kwargs) \
 
     def iter_metric(x: list[TData]) -> list[SolutionQualityInfo]:
         return list(map(single_factory, x))
+
+    return iter_metric
+
+
+def custom_metric_parallel(name: str, evaluation: Callable[[TData], float], **kwargs) \
+        -> Callable[[list[TData]], list[SolutionQualityInfo]]:
+    single_factory = partial(SolutionQualityInfo, name=name, float_=evaluation, **kwargs)
+    pool = ThreadPool(8)
+
+    def iter_metric(x: list[TData]) -> list[SolutionQualityInfo]:
+        return list(pool.map(single_factory, x))
 
     return iter_metric
 

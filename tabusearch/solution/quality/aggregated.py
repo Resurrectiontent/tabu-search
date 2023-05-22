@@ -43,10 +43,7 @@ class AggregateComparisonSolutionQualityInfo(BaseAggregatedSolutionQualityInfo):
 
 class CompareAggregatedSolutionQualityInfo(SolutionQualityInfo, BaseAggregatedSolutionQualityInfo):
     def __init__(self, metrics, name: str, aggregation: Callable[[Iterable[float]], float]):
-        # may remain unused
-        def value_str(metr):
-            return '\n'.join(list(map(str, metr)))
-
-        # most likely will be used
+        value_str = '\n'.join(list(map(str, metrics)))
         float_n = aggregation(map(float, metrics))
+
         super().__init__(list(metrics), name, float_n, False, value_str)

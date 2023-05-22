@@ -1,10 +1,19 @@
+import sys
+import os
+
 import numpy as np
 import pytest
 from scipy.stats import norm, expon
 from matplotlib import pyplot as plt
 
-from mutation.neighbourhood import NearestNeighboursMutation, FullAxisShiftMutation
-from solution.quality.lib import custom_metric
+# if os.path.exists('/tabu-trailing'):
+#     sys.path.extend(["/tabu-trailing/tabu-search",
+#                      "/tabu-trailing/tabu-search/tabusearch",
+#                      "/tabu-trailing/tabu-search/tests",
+#                      "/tabu-trailing/sampo"])
+
+from tabusearch.mutation.neighbourhood import NearestNeighboursMutation, FullAxisShiftMutation
+from tabusearch.solution.quality.lib import custom_metric
 from tabusearch import TabuSearch
 from tabusearch.solution.base import Solution
 from tests.function_optimisation.functions import rosenbrock, styblinski_tang, mccormick, michalewicz, zakharov
@@ -52,7 +61,9 @@ def test_optimisation(setup_func_x0):
     h: list[Solution] = optimiser._history
     print('\n', s.position)
     print(s.quality)
-    plt.plot(np.arange(len(h)), np.array([x.quality.value for x in h]))
-    plt.xlabel('Iteration')
-    plt.ylabel('Value')
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.plot(np.arange(len(h)), np.array([x.quality.value for x in h]))
+    ax.set_xlabel('Iteration')
+    ax.set_ylabel('Value')
+    # fig.savefig(f'scheduling/results/fig_{function.__name__}.png')
+    fig.savefig(f'/results-out/fig_{function.__name__}.png')
