@@ -4,8 +4,8 @@ from copy import copy
 from functools import wraps, reduce
 from typing import Iterable, Set, Tuple, List, Callable
 
-from memory.base import BaseMemoryCriterion
-from solution.id import SolutionId
+from tabusearch.memory.base import BaseMemoryCriterion
+from tabusearch.solution.id import SolutionId
 from tabusearch.solution.base import Solution
 
 
