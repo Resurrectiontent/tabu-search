@@ -37,7 +37,7 @@ def custom_metric(name: str, evaluation: Callable[[TData], float], **kwargs) \
 def custom_metric_parallel(name: str, evaluation: Callable[[TData], float], **kwargs) \
         -> Callable[[list[TData]], list[SolutionQualityInfo]]:
     single_factory = partial(SolutionQualityInfo, name=name, float_=evaluation, **kwargs)
-    pool = ThreadPool(8)
+    pool = ThreadPool(4)
 
     def iter_metric(x: list[TData]) -> list[SolutionQualityInfo]:
         return list(pool.map(single_factory, x))
